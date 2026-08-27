@@ -34,7 +34,7 @@ You are designing integrations for a medium-sized hospital. When a patient arriv
    
     - Hospital Patient Management System (HPMS)
 **------------- provider
-   ++
+   
     - Insurance Validation Service
 **------------------------------------- provider eller broker?
 
