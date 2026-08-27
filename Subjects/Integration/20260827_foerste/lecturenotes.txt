@@ -20,6 +20,29 @@ Eksempler: oracle, SAPbi, SAP S/4HANA (alle hader det og det koster millioner, m
 ERP (Enterprise Resource Planning) systemer bruger typisk N-tier, fordi N-tier kan gøres extremt sikre. Prisen er
 at de er svære at vedligeholde.
 
+- Enterprise SOA (service oriented architecture)
+(if you encounter one, run away! De er ikke gode, men de er forgaengeren for microservices).
+Det var ikke lavet til web, men til adskilte - separat deployed tjenester on-site hos organisationen. Det
+var oprindeligt lavet til banker.
+
+
+- Microservices --
+each microservice must own its own data.
+fordele == kan scala horizontalt.
+det vigtigste er at definere kontrakterne.
+der er firmaer der stoler saa meget på deres kontrakter, at de kun har unittests.
+andre har kun end-to-end.
+-- scaling - hver microservce kan bruge sharding, replication og partition.
+Netflix og spotify er berymte for deres microservices.
+
+- servcerless
+eksempler: guru (fintech company)
+
+- peer-to-peer
+-- eksempel: IPFS (er den "lovlige" udgave af bit torrent)
+
+
+
 
 
 
