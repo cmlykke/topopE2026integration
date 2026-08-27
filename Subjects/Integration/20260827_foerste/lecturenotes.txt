@@ -1,0 +1,25 @@
+
+
+2026-08-27 --- Intro
+
+
+--- software architecture models ect
+
+SOA - service oriented architecture.
+
+- monolith == single executable, godt til limited scope applications., giver tight copeling (alt vil fejle hvis der er en fejl)
+
+- N-tier == (eg. 3-tier -- presentation, business, data - popular in 1990-2005)
+man kan have flere tiers.
+f.eks. (aabne forslag) security layer (eller flere), API/service layer, Business logic, persistence/data layer
+eller:
+client, presentation, security, controller, application, domain model (the business logic),
+audit, cache, persistence, database(stored procedures, triggers, views),
+(each of the 10 are deployed independantly, men det er stadig en monolith),
+Eksempler: oracle, SAPbi, SAP S/4HANA (alle hader det og det koster millioner, men den er en lifesaver for firmaer)
+ERP (Enterprise Resource Planning) systemer bruger typisk N-tier, fordi N-tier kan gøres extremt sikre. Prisen er
+at de er svære at vedligeholde.
+
+
+
+
