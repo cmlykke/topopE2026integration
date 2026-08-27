@@ -42,6 +42,15 @@ eksempler: guru (fintech company)
 -- eksempel: IPFS (er den "lovlige" udgave af bit torrent)
 
 
+****************************************************************
+
+Service oriented architecture:
+
+hvis en "service" har en UI, saa kan vi ikke kalde det en service. så er den en application.
+
+
+
+
 
 
 
