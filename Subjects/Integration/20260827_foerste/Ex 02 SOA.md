@@ -26,13 +26,28 @@ You are designing integrations for a medium-sized hospital. When a patient arriv
 
 1. Identify roles. For each of the following systems, decide whether it acts as a service provider, service requester, or service broker:
 
-    - Admission System
+    - Admission System        
+**------------ requester (for de flester) men er provider for EMR system
+   
     - National Patient Registry (NPR)
+**------------- provider
+   
     - Hospital Patient Management System (HPMS)
+**------------- provider
+   ++
     - Insurance Validation Service
+**------------------------------------- provider eller broker?
+
     - Bed Management Service
+**------------------------------------- provider
+
     - EMR System
+**------------------------------------ er reqester (og admission er dens provider). Men er det bidirectional ???
+
     - Service Registry
+**-------------- service broker
+
+
 
     Note that a system could potentially play more than one role.
 
