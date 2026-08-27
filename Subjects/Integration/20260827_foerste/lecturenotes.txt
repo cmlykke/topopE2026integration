@@ -49,6 +49,15 @@ Service oriented architecture:
 hvis en "service" har en UI, saa kan vi ikke kalde det en service. så er den en application.
 
 
+*******************************************************************
+
+CQRS -- fx. linked in. alt man skriver, liker eller deler bliver lagt i en koe, som
+exekveres gradvist. write har ingen separat database.
+laesning (ens personlige feed er et separat system med key-vaue stores ect.)
+
+
+
+
 
 
 
