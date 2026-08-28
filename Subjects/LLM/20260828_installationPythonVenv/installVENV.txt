@@ -33,7 +33,7 @@ then run:
       Set-ExecutionPolicy -Scope Process Bypass
       .\20260828setup-venv.ps1
 
-
+Then set the path to the .venv as the interpreter in Pycharm
 
 
 
