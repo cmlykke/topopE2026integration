@@ -1,0 +1,29 @@
+
+2026-08-28
+
+undervisningen foerste gang handler om intro,
+og LLM hallusination og ambiguity
+
+Large Language Models Hallucination: A Comprehensive Survey
+https://arxiv.org/abs/2510.06265
+
+September 5, 2025
+Research
+Publication
+Why language models hallucinate
+https://openai.com/index/why-language-models-hallucinate/
+
+
+🔥 Breaking the Language Barrier: Why Ambiguity in LLMs Must Be Solved
+https://medium.com/@ashudevjava/breaking-the-language-barrier-why-ambiguity-in-llms-must-be-solved-e77980b265f1
+
+Why We Need Drift-Aware Retrieval-Augmented Language Models
+https://medium.com/@EvePaunova/why-we-need-drift-aware-retrieval-augmented-language-models-0dcefbd3052a
+
+
+Large Language Models explained briefly
+https://www.youtube.com/watch?v=LPZh9BOjkQs
+
+
+
+
