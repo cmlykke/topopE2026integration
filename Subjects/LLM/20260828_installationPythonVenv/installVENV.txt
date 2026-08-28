@@ -14,7 +14,29 @@ requirements.txt
 Use the file produced by uv pip freeze above. That is the exact versions. If you have not frozen yet, this is the minimum set you installed.
 
 
+setup-venv.ps1
+create a file the above, and save it next to requirements.txt in the repo.
 
+
+That script puts .venv at C:\Users\<you>\IdeaProjects\.venv, same layout as now, assuming the repo is C:\Users\<you>\IdeaProjects\topopE2026integration.
+On the other machine
+
+Install uv if needed.
+Clone the repo into ...\IdeaProjects\topopE2026integration.
+If scripts are blocked:
+
+PowerShellSet-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+Run:
+
+PowerShellcd C:\Users\<you>\IdeaProjects\topopE2026integration
+.\setup-venv.ps1
+
+In PyCharm, set the interpreter to:
+
+C:\Users\<you>\IdeaProjects\.venv\Scripts\python.exe
+
+Add .venv/ and .jupyter-runtime/ to .gitignore if they are not there already. Commit requirements.txt and setup-venv.ps1 only.
 
 
 
