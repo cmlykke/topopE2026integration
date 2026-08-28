@@ -4,11 +4,17 @@
 
 -- Copy the venv of the current machine, so i can recreate it:
 
-
+'''
 cd C:\Users\Bruger\IdeaProjects
 .\.venv\Scripts\Activate.ps1
 uv pip freeze | Out-File -Encoding utf8 C:\Users\Bruger\requirements.txt
-
+'''
 
 requirements.txt
-Use the file produced by uv pip freeze above. That is the exact versions. If you have not frozen yet, this is the minimum set you installed:
+Use the file produced by uv pip freeze above. That is the exact versions. If you have not frozen yet, this is the minimum set you installed.
+
+
+
+
+
+
