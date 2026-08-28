@@ -4,9 +4,8 @@
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$VenvDir = Join-Path (Split-Path -Parent $RepoRoot) ".venv"
-# If you prefer the venv inside the repo instead, use:
-# $VenvDir = Join-Path $RepoRoot ".venv"
+
+$VenvDir = Join-Path $RepoRoot ".venv"
 
 $Requirements = Join-Path $RepoRoot "requirements.txt"
 $PythonVersion = "3.14"

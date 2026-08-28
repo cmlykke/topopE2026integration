@@ -2,6 +2,47 @@
 
 -- 2026-08-28
 
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<< install the venv setup on another PC
+
+----- check if venv is installed:
+
+python -m venv --help
+
+--- if not: install it
+
+--- if it is:
+
+go to cd D:\path\to\future\venvfolder
+
+instyall uv:
+
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+check the installation with: uv --version
+
+if it doesnt exist, run:
+$env:Path = "C:\Users\USER\.local\bin;$env:Path"
+
+then place the two files ...setup-venv.ps1 and requirements.txt in the folder where
+you want .venv to apear.
+
+then run:
+
+      Set-ExecutionPolicy -Scope Process Bypass
+      .\20260828setup-venv.ps1
+
+
+
+
+
+
+
+
+
+<<<<<<<<<<<<<<<<<<<< save venv installation for another PC
+
 -- Copy the venv of the current machine, so i can recreate it:
 
 '''
