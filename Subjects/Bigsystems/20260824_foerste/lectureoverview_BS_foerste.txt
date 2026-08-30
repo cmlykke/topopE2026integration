@@ -1,0 +1,56 @@
+Course introduction:
+
+Teacher / students introduction
+Lectures plan
+mandatories + project
+Exams info
+Literature: books, online courses, other materials
+Software Architecture Patterns (free)
+
+Microservices vs SOA (free)
+
+Microservice Patterns : With examples in Java - ISBN13:9781617294549
+
+Udemy / Pluralsigh
+
+Introduction of the project
+
+Create working groups
+Come up with your project description
+DLS Intro lecture: overview of main concepts which will be covered in detail later:
+
+Distributed systems intro:
+Types
+Architecture
+Examples
+Components of a distributed system
+Cloud computing
+Communication: sync / async
+Microservices
+Frameworks for developing distributed systems
+Scalability (microservices, databases)
+Data layer:
+replication
+sharding
+CAP theorem
+Extra materials from Databases course
+DevOps:
+Agile methodology, cooperation
+CI/CD
+Automated testing (unit, integration, end-to-end, …)
+Infrastructure as code - Terraform
+Monitoring, alerting, collecting and viewing metrics + tools
+Resources:
+
+Distributed Systems - Big Picture lecture
+architecture/guide/
+Demos:
+
+Demo 1 - Distributed system design - just a design, no implementation
+Demo 2 - Example of distributed system - node.js
+
+
+Tasks for the week:
+
+Start working on the 1st Mandatory Assignment.
+Look for the literature / online courses for this course that fit your tech stack.
