@@ -1,3 +1,57 @@
 
+at  scala med containers er ofte bedre end
+virtual machines, fordi containers ikke har et operativ system,
+(der starter langsomt / giver opstart overhead)
+
+tokens er ligeledes  bedre end sessions,
+fordi med tokens involvere
+man ikke databasen.
+(for mig er det en forlaengelse af at
+Stateless er bedre end statefull,
+eller: jo mere man kan fjerne fra projektet
+og bare funktionaliteten jo bedre)
+
+prioritet:
+scalability, availability, failure resiliance.
+
+
+god ide at bruge api gatewaytil security.
+derved kan man have en global loesning til ting som authentication.
+
+
+caching....man kan have local cache,
+men man kan ogsaa have en global cache i databasen,
+f.eks. most used queries.
+
+vi vil bruge kubernetes lokalt for at simulere
+f.eks. cloud load balancing.
+
+----------------------
+
+i vores projekt skal vi have baade REST og graph ql
+
+sequence diagrams er gode til at illustrere aga pattern.
+det er en business logic implementeret transaction
+i en kæde af microservices. Helt basalt:
+error handling mellem microservices
+(hvis en microservice's domæne kraever en database,
+ skal denne være unik for denne microservice.
+ Det er formentligt uundgaaeligt at data
+ i en micro-database kommer til at afhaenge af data
+ i en anden (f.eks. ny bruger, og bruger ordre.
+ Hvis en bruger-oprettelse fejle, skal denne
+ brugers ordre i ordre databasen ogsaa tilbagerulles.
+ dette kraever en transaction paa tvaers af
+ databaserne == saga pattern).
+
+den stoerste forskel paa microservice vs. mono,
+er communication.
+Til distribueret har vi forskellige typer communikation:
+   fx. rest, async, fire and forget.
+
+
+
+
+
 
 
