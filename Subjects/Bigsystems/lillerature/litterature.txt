@@ -1,0 +1,78 @@
+
+2026-08-30-14.59
+
+litterat7rliste:
+
+
+
+Main book:
+
+S. Newman, Building Microservices: Designing Fine-Grained Systems, 2nd ed., 2022.
+
+https://www.amazon.de/-/en/Sam-Newman-ebook/dp/B09B5L4NVT
+
+
+
+
+
+Other resources
+
+(this list might be oudated, make sure to find up-to-date resources):
+
+
+
+If you like to read books. the recommended topics are:
+
+Microservices
+Event-driven systems / architecture
+Domain-Driven Design
+Distributed systems
+For example:
+
+https://www.amazon.com/Microservices-Enterprise-Designing-Developing-Deploying/dp/1484238575
+https://www.amazon.com/Microservices-Patterns-examples-Chris-Richardson/dp/1617294543
+https://www.amazon.com/Designing-Distributed-Systems-Patterns-Paradigms/dp/1491983647
+https://www.amazon.com/Building-Microservices-Designing-Fine-Grained-Systems/dp/1491950358
+https://www.amazon.com/Monolith-Microservices-Evolutionary-Patterns-Transform/dp/1492047848
+https://www.amazon.com/Art-Immutable-Architecture-Management-Distributed/dp/1484259548
+Online resources:
+
+Cloud providers web sites
+Microsoft web sites – for example: https://learn.microsoft.com/en-us/azure/architecture/patterns/
+Awesome Architecture: https://github.com/mehdihadeli/awesome-software-architecture
+Online courses:
+
+There are so many… You can look at Udemy, Pluralsight, free tutorials…
+
+For example on Udemy:
+
+Spring Boot
+https://www.udemy.com/course/spring-boot-microservices-with-spring-cloud-beginner-to-guru/
+https://www.udemy.com/course/microservices-clean-architecture-ddd-saga-outbox-kafka-kubernetes/
+https://www.udemy.com/course/the-complete-cloud-computing-software-architecture-patterns
+https://www.udemy.com/course/spring-boot-microservices-cqrs-saga-axon-framework/
+.NET Core
+https://www.udemy.com/course/net-core-microservices-the-complete-guide-net-6-mvc/
+https://www.udemy.com/course/net-microservices-cqrs-event-sourcing-with-kafka/
+Node.js
+https://www.udemy.com/course/microservices-with-node-react-and-mongo/
+Python
+https://www.udemy.com/course/python-microservices/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
