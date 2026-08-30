@@ -9,20 +9,20 @@ Match the following scenarios to the application pattern that best fits them (la
    - Reads (product browsing, search, filtering) happen millions of times per day
    - Read requirements differ significantly from write requirements (denormalised views, search indices)
 
-CQRS (we need to separate reads and writes).
+---------------------------------CQRS (we need to separate reads and writes).
    
 2. **Booking System**  
    A flight and hotel booking platform built around a rich domain model (reservations, pricing rules, cancellations).  
    The company wants domain logic insulated from frameworks, UI, and database technology because they expect a migration from SQL to NoSQL in two years.
    
-Hexagonal
+-------------------------------Hexagonal
 
 
 3. **ERP Lite**  
    Medium-sized enterprise app with clearly separated domains: Inventory, Invoicing, HR, Scheduling.  
    All modules share the same codebase and database, but must enforce strict boundaries so that teams can work independently without committing to microservices.
 
-Modular monolith
+------------------------------Modular monolith
 
 
 4. **Bank Ledger with Audit Trail**  
@@ -30,14 +30,14 @@ Modular monolith
    Auditors require the ability to reconstruct the state at any moment in the past.  
    Corrections must be made as compensating transactions, never by editing data.
 
-Event sourceing
+---------------------------Event sourceing
 
 
 5. **Webshop**  
    A standard webshop with predictable CRUD operations: list products, add to cart, place order, update user info.  
    Stable requirements, minimal complexity, classic front-end + business logic + data access setup.
 
-Layerd pattern (n-tier architecture). == det er godt at tage hoejde for vaekst, men man maa ikke "overdue it"
+----------------------------Layerd pattern (n-tier architecture). == det er godt at tage hoejde for vaekst, men man maa ikke "overdue it"
 
 6. **Photo Editor with Plugins**  
    Users download a desktop photo editor with a solid core (loading/saving images, basic editing).  
@@ -50,7 +50,7 @@ Microcernel
    Each provider has different APIs, authentication models, and workflows.  
    The business logic should not change when a provider is replaced.
 
-Hexagonal
+-----------------------------Hexagonal
 (could be onion perhaps)
 
 

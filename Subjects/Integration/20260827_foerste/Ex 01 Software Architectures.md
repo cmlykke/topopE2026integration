@@ -12,7 +12,7 @@ Match the following scenarios to the software architecture(s) that best fit them
     - Limited budget for operations
     - No real-time features   
 
-der vil ikke være millioner af brugere, kun nogle faa, 
+--------------der vil ikke være millioner af brugere, kun nogle faa, 
 Det bør vaere N-tier. Der er ikke behov for mere.
 
 2. **Ride-Now**. Real-time ride-sharing app  
@@ -24,7 +24,7 @@ Det bør vaere N-tier. Der er ikke behov for mere.
     - Very high availability required
     - Continuous deployment expected   
 
-Det ligner en UBER klon. Det er en kerne tilfaelde for 
+--------------------Det ligner en UBER klon. Det er en kerne tilfaelde for 
 == Microservices
 
 3. **Stockflow**. Batch-processing inventory system for a warehouse  
@@ -35,7 +35,7 @@ Det ligner en UBER klon. Det er en kerne tilfaelde for
     - Each subsystem already exposes some form of interface (XML or CSV over FTP / HTTP)
     - Real-time performance is not a requirement
 
-Enterprise 
+----------------------------Enterprise 
 Det der giver det vaek er at det skal bruge Batch, og at der er legacy systems.
 
 4. **Smart-Gallery**. Photo tagging and catalogue  
@@ -49,7 +49,7 @@ Det der giver det vaek er at det skal bruge Batch, og at der er legacy systems.
     - Processing of each image is independent
     - However: business expects future features (face recognition privacy rules, shared galleries, advanced search)
 
-Serverless, men kan vaere microservices
+-------------------------------Serverless, men kan vaere microservices
 
 
 5. **Musik-Fest**. Digital programme and media downloads  
@@ -67,7 +67,7 @@ Serverless, men kan vaere microservices
     - Content updates are infrequent (daily)
     - Back-office is small and can accept simple deployments
 
-N-tier (en app paa telefonen, men en monolit/Ntier backend).
+-----------------------N-tier (en app paa telefonen, men en monolit/Ntier backend).
 Det kunne ogsaa vaere serverless, hvor sky-funktione giver appen al den 
 data den skal have under download,
 saa funktionen kun bliver brugt ca. 1 gang pr. app download + 
