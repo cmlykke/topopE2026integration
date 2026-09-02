@@ -1,0 +1,49 @@
+
+
+
+
+
+
+
+
+
+https://github.com/arturomorarioja-ek/SD_System_Integration_E2026/blob/main/README.md
+
+
+Lesson 1 (27 August): Software Architectures and Application Patterns. SOA and Web Services
+Lesson 2 (3 September): TCP/IP. HTTP
+Lesson 3 (10 September): REST
+Lesson 4 (17 September): SOAP. XML. File formats
+Lesson 5 (24 September): GraphQL
+Lesson 6 (1 October): gRPC
+Lesson 7 (8 October): WebSockets, SSE, polling. Distributed Databases
+Lesson 8 (15 October): Work on the First Mandatory Assignment
+Lesson 9 (22 October): First Mandatory Assignment: student presentations
+Lesson 10 (29 October): API Security Attacks. Token authentication
+Lesson 11 (5 November): API Authentication and Authorisation: JWT. OAuth2/OIDC
+Lesson 12 (12 November): API Documentation. Course recap
+
+
+They will take place in the afternoon, from 12:45:
+
+· 27/8 Software Application Patterns
+
+· 17/9 File formats
+
+· 8/10 Distributed Databases
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
