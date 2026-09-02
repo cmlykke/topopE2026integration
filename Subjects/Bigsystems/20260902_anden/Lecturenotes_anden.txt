@@ -1,0 +1,183 @@
+----------------------------------
+Lesson 2 (2. September).
+-------------------------------
+
+Lecture er mest om ;internal kald mellem microservice.
+Man har en message que - eg. rabbit MQ.
+
+fordelen er at hvis en microservice er nede,
+så ligger data stadig i køen.
+Med distribuerede systemer, kan man kun have eventual consistancy.
+
+man kan sige at rabbit MQ (der køre på sin egen server)
+er lidt som en database. man koder den ikke selv.
+man har den liggende i skyen.
+
+eksempel: "CloudAMQP". de tilbyder gratis (free tier) kø man kan bruge.
+
+-- terminologi for køer._ publish subscribe, or produce consume (begge terminologier bruges.)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Hvis man har microservice, så er det et anti pattern at have den samme database.
+Hver microservice skal have deres egen database (hvis de skal bruge deres database).
+
+man kan f.eks. have en relationel database til high+level data,
+og en mongo DB database til alle detaljerne på en bestemt side
+(f.eks. alle detaljer om et spil elelr en film, hvis man har en
+side om spiludgivelser eller en filmdatabase).
+(en enkelt microservice kan have flere databaser. det er ok.)
+
+Alle projekter skal have Kafka og AI, (tidligere skulle alle projekter have datalakes)
+(det er det der er trendy, siger Thomas bror, der er dataarkitektet)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Distributed systems foundation:
+
+
+IDempotence: idempotence means that we want to ensure that if i do multiple operations (clicking a payment)
+ the system will only perform the actions once (den laver kun 1 payment).
+
+immutability: the database is not allowed to destroy data.
+(destroy == update eller delete)
+en maade er at have flere versioner af den samme data.
+
+
+Heterogenous network:
+hver microservice skal kunne aendres / scaleres separat.
+
+
++++++++++++++++++++++++++++++++++++++++++++
+
+
+The problems with CRUD
+
+Projekt vi bruger som eksempel i dag:
+pesekt1/GloboTicketProject
+
+Entity framework:  (.NET framework)
+versioning af databasen.
+(en god ting ved Entity framework er at man kan mogrere microservices
+til en nyere version (up) ved at skifte til den relevante branch,
+eller man kan nedgradere til en ældre version (down))
+
+Man kan ogsaa bruge flyway eller noget andet, afhaengigt af hvilket sprog man bruger.
+
+For IDempotency, koden er noedt til at kunne skelne mellem
+first+try og retry.
+=== frontenden kan lave en KEY/id, der fortæller backenden om
+et request er et Retry.
+(hvis det er et retry, så sender  den samme ID)
+Der erefter er backenden noedt til at gemme requesten, så hvis der kommer en retry
+senere, så kan backenden se at den efterfølgende request er et retry.
+
+User error messages: Der er bedre at lade som om at
+alt går godt !!??  og sende fejlene til en log.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+"the context problem" == separate commands from queries
+
+One optimation, makes the rest slow.
+Hvis man adskiller commands and queries, saa
+
+man kan ogsaa have adskilte databaser for read and write.
+f.eks. kan man bruge elastic search, som er en slags docuemnt database. (ser ud til at den kan mere.)
+
+
+
++++++++++++++++++++++++++++++++++++++++
+
+CQRS: hvilket lag vil vi splitte? === controllers.
+MAn kan have forskellige klasser for sine command and for sine querie endpoitns.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Immutable data:
+
+immutability pattern:
+
+Venue, venue description, venue removed.
+
+SNapshots:
+
+Tombstones:
+
+imagine you want to do upde: you are not allowed to do SQL update, instead you you insert internally.
+You can add a timestamp to show which one is the newest.
+
+Man har 3 tabeller.
+-venue har kun autogenerede ID-er til brug for 2 foreign tables, samt Guid-s
+-AL data har man i et venue description table.
+-I en anden tabel: Venue removed, har man id-erne
+på de rows (gamle versioner af mon venue) der er "deleted" samt dato timestamp
+på tidspunktet for removel.
+
+
+---- CQRS peattern in the code (thomas project):
+klasser: Venue, VenueCommands, VenueInfo (DTO object), VEnueQuerries, Venue
+
+
+En refacturerering af en ghammel kodebase til TOmbstone pattern (immutability)
+er en god usecase for TDD, fordi man kan definere alle kravene paa forhånd,
+og kan derfor skrive testene.
+
+
+
++++++++++++++++++++++++++++++++++++++++++
+
+++++++++++++++++++++++++++
+Project brainstorms +++ kl. 11.45
++++++++++++++++++++++++++++
+
+forslag til tjenester man kan bruge:
+Loki, grafana, Prometheus, KEDA. (KIbana?)  -- se slide
+HUsk vi skal kunne demonstrere autoscaling
+
+det vigtige til eksamen er at kunne demonstrere at
+det f.eks. kan hadtere at en microservice er nede
+(ved at slukke for en kontainer f.eks.)
+eller simulere heavy workload (mange requests),
+elelr demo IDempotence ved at man proever at oprette den samme bruger 10 gange...
+ect.
+Coll ide: vis at med forskellig workload,
+kan kubernetes soerge for at en microservicer
+scaler fra 1 til 2 kopier af services (med en loadbalancer)
+og tilbage igen naar workload falder.
+-- eksempel: faa personer sender requests til koern,
+man kan saa se i rabbitmq at antallet af beskedder stiger  og
+receiver kan ikke processere dem.
+Saa scaler man, og man kan se at antallet af beskedder falder.
+
+Husk at vi skal bruge kubernetes cluster
+
+Man kan f.eks. lave microservice for auditing / logging,
+eller integration med 3.parts tjenester.
+Hvis man har en bank app, kunne man f.eks
+have en microservice til beregninger (calculator)
+
+++++ til Thomas examne -- godt at have powerpoint med
+copy paste billeder fra rapporten.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
