@@ -6,11 +6,17 @@ You need to define the architecture for **GameHub**, which sells downloadable vi
 The system consists of six components:
 
 - A. **User Management**. Standard CRUD for users, addresses and preferences. UI → business logic → persistence.
+---------------- layerd
 - B. **Payment Gateway**. GameHub must support MobilePay, PayPal and credit cards. Providers should be replaceable without modifying the business logic.
+---------------- hexagonal
 - C. **Game Catalogue**. Thousands of catalogue reads for every update. The model used to search/display games differs substantially from the model used by publishers to maintain them.
+---------------- CQRS 
 - D. **Purchase History**. Every purchase, refund and correction must be retained. The current state must be reconstructable from everything that has happened.
+---------------- event sourcing
 - E. **Discount Engine**. Different discount mechanisms can be installed: seasonal sale, student discount, publisher campaign, loyalty discount, etc. New mechanisms should be addable without changing the core application.
+---------------- microkernel
 - F. **Store Backend**. Users, catalogue administration, shopping cart and orders share a single deployment and database, but the code should have strong boundaries between these functional areas.
+---------------- modular monolith
 
 #### Part One
 Match each component with its corresponding application pattern (layered, hexagonal, CQRS, event sourcing, microkernel, modular monolith).
@@ -25,6 +31,8 @@ GameHub has:
 - No requirement for independent deployment of different business areas
 
 Which is the most appropriate software architecture (monolith, N-tier, enterprise SOA, microservices)?
+
+-------------------------------- monolith or N-tier
 
 #### Part Three
 GameHub consists of:
@@ -41,7 +49,9 @@ When a customer buys a game, the following happens:
 
 Questions:
 1. Which component acts as both a service provider and a service requester?
+---------------------------------- Payment Service er baade requester og provider for order service. 
 2. Which service is reused by more than one requester?
+--------------------------------- Order Service bruges af baade Web Store og Mobile App
 
 #### Part Four
 Three years pass and GameHub has:
@@ -53,4 +63,11 @@ Three years pass and GameHub has:
 
 Questions:
 1. Which overall architecture becomes more attractive now?
+----------------------  microservicecs eller serverless (er SOA brugbar her?)
 2. Which three components would you adapt to the new architecture first?
+---------------------   ??? maaske:
+---------------------  **Game Catalogue**   CQRS
+---------------------   **Discount Engine**  microkernel
+---------------------   **Store Backend**    modular monolith
+
+----------------------  eventuelt User Management (layerd) istedet for Game Catalogue

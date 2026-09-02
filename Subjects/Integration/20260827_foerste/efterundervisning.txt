@@ -1,0 +1,124 @@
+
+ - week 1. integration
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+- Software architecture
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+architecture models:
+
+<< Monolith ---- god til smaa sysremer du kun bruger i kort tid (ikke lang levetid / maintenance)
+   + Understand, implement, deploy, coordination
+   - tight coupling, maintainability, (usually) one language
+
+<< N-tier     --- god til smaa systemer
+   + independant development for each tier,
+     independant integrationm deployment, scalability
+   - change in tier may affect others, (added feature needed in all tiers)
+
+<< Enterprise SOA  --- god til legacy systems og hvis der kraeves batch
+   (multiple services, each = 1 businessactivity (2000-2015),
+    contract standardisation + central governance)
+   + Loose coupling, easy to scale, no duplication.
+   - central governance == reduced team autonomy / reduced agility
+     costly to implement.
+
+<< Microservices    --- god til store systemer uden legacy kode + "independant evolution of subsystems"
+   + loose coupling, easy scaling, incresed agility, reliability (automation)
+   - design and inplementation complexity
+     complexity among services.
+
+<< Serverless   --- god hvis vender lockin og pris ikke er et problem. (og måske hvis load er meget ujævn)
+   + easy to scale, easy to add functions, less infrastructure.
+   - tied to vendor, steep learning, cold starts, expensive.
+
+<< P2P
+   + ideal for sharing resources, cost effective, easy to scale
+   - lack central control, potential security issues
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+- Software application patterns
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+layerd -- mest til legacy systemer. (eg netflix før microservices)
+          "domain calls infrastructure to which it is coupled"
+onion vs hexagonal:
+          independant infrastructure calls domain via domaindefined
+          interfaces.
+          hexagonal: how to implement domain is not clear, unlike onion.
+
+
+<< Layerd (not the same as n-tier)
+   (different responsibilities in different layers,
+    ofte set hos legacy systems. ofte i banker, eg.
+    Presentation, Business, integration
+    (fx. to other subsystemsfor fraud detection), Data)
+   - high coupling
+     too code-heavy for simple operations.
+
+<< Onion
+   (eg. domain model -> domain services -> application services -> interface)
+   the flow is oposite the layerd model.
+   DDD domain driven desing.
+   each layer doesnt know about the others
+   inner layers define interface, outer layers implement.
+   (use case: e-commerce, complex domains (healthcase), billing platforms (complex pricing))
+   + business layer decoupledm, easier testing, low complexity
+   - code heavy for large systems, need dependecy inversion understanding
+
+<< Hexagonal
+   (core module is business logic, whose interfaces are called ports)
+   (use case: travel booking agregator,
+   interact with airlines, hotells, payment gateways....)
+   + loose coupling, reduced complexity
+   - domain can become monolith, need dependency inversion understanding.
+
+<< Modular monolith
+   (separate modules (for doamin, not technical) in single executable)
+   (use cases: able to handle masive loads, SCM systems,
+   systems where you know you need sequential flow.)
+   + loose code coupling, increased agility,
+     easy to run locally, easy to deploy.
+   - learning curve, scaling constraints.
+
+<< Microkernal
+  (use cases: photoshop, webbrowsers, intellij, UnrealEngine, VLCmediaplayer)
+  + flexibility, clean separation of code and teams.
+     functionality can be added and removed at runtime.
+  - an extension could currupt the code.
+
+<< CQRS
+   two separate models for reading and writing.
+   (use cases: linkedin, Azure cosmos DB, Financial dashboards)
+   + reading data becomes faster
+   - added complexity and learning curve.
+     if replication or sharding:
+        data dublication, eventual consistence, sync issues maybe.
+
+<< Event sourcing
+   uses: Incremental map updates, dynamic pricing, orders,inventory,payment
+   (usecase: Uber, shopify, Linked in.)
+   instead of storing data's current state, the events
+   that happen to data are stored.
+   REHYDRATION: replay. to know about the current state, all events must be played.
+   + Audit trail, easier debugging and error fixing.
+   - issues involding external systems,
+     changes can invalidate previus events,
+     too many events can make replay slow.
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+- Service oriented architecture
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+DOA -- predecessor of SOC
+
+
+
+
+
+
+
+
