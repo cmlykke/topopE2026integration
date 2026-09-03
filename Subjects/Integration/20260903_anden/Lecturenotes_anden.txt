@@ -1,10 +1,118 @@
+
+
 ----------------------------------
 Lesson 2 (3 September): TCP/IP. HTTP
 -------------------------------
 
+Homework til naeste gang: Idempotency opgaven er den vigtigste.
 
 
+-------------------------------------------
 
+REST koere over HTTP.
+SOAP KAN vaere over http, men kan vaere over andre netwark.
+GraphQL er normalt over http
+sockets....
+
+
+i diagrammet i slide: runde er router, firkantede er switch
+
+
+"routers" i private hjem er ikke kun routere. de spiller mange roller..
+
+
+OSI model:
+TCPIP existerede foer OSI modellen. OSI modellen er kun teoretisk.
+TCKIP er uafhaengigt af dens fysiske medium.
+
+Transportlayer: proever at sikre at opspillede pakker bliver samlet igen,
+               og brugeren faar det de vil have og ikke faar dubletter.
+
+TCP og UDP arbejder "on top of" IP.
+
+
+Transport level og network level bruger headers til sende pakker over netvaerket.
+Disse headers er HELT ANDRLEDES end browser headers, som kun er application level.
+
+
+---------------------------------------------
+
+Network layer i detaljen:
+
+when an IP adresse is combined with a port, we call it a (web)socket.
+it tells you what process on what machine makes the request.
+
+man kan tjekke sine sockets ved at skrive "netstat" i terminalen,
+eller "netstat -s" som giver statistik.
+netstat -f     viser ogsaa de urler man er forbindet til
+
+
+---------------------------------------------
+
+SSL / TLS
+(SSL bruges ikke laengere. det er erstattet af TLS, men mange folk kalder det stadig SSL).
+
+UDP er ikke sikker, og er upaalidelig/ustabil,
+men er hurtig fordi den sender meget lidt data.
+Det er perfekt til streaming.
+
+QUIC -- erstatning for UDP der er hurtig flexibel og sikker som TCP!!!!
+(mandatory encruption.)
+(det koere "on top of" UDP)
+Det er lavet af google til youtube som erstatning for UDP,
+og idag bruges det af 8,6 % af trafik, men 75% af facebooks / metas trafik
+
+
+------------------------------------------------------
+
+HTTP:
+
+HTTP 1.1 (1996) og HTTP 2 (2015).
+(i arturos test, var http 1.1 billede 18 sekunder om at loade, og HTTP 2 tog 5 sekunder.)
+
+HTTP 3 (2022) bruger QUIC.
+bruges af google, og streaming.
+
+Marketshare: v1.1 29.9%  v2  49,6%   v3 20,5%  for 2 aar siden. i dag: v 1.1 = 10%, v 2 = 60%, v3 29 %
+
+--------------------------------------------------------
+
+MIME types: (media types)
+
+PDF skal vi vaere forsigtige med. man kan sende javascript forklaedt som en pdf.
+derfor SKAL man saette headeren til application/PDF hvis man har pdf's
+
+
+Form dubmission media types:
+multipart/form-data boer man undgaa. der er for meget data overhead.
+
+----------------------------------------
+
+HTTP status code:
+method HEAD er god fordi den kun returnere header. derved kan man checke date,
+som man kan bruge til at check om man har cached payload inden man faar den.
+
+
+i terminal:
+
+curl -v  "hjemmeside url"
+for at faa info om siden.
+
+---------------------------------------------------
+
+IDempotency
+
+
+--------------------------------------------------
+
+HTTP querry method
+
+OFte bruger man POST til alle sineendpoints,
+
+HTTP query loeser get-request problemet.
+Eneste problem er at det ikke er bredt understoetet endnu.
+
+www.self-signed.badssl.com
 
 
 
