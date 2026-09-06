@@ -2,13 +2,117 @@
 Lesson 2 (5 September)
 -------------------------------
 
+Brug traits til at faa gode svar.
+Traits:
+    Roles: "you are an expert developer"
+    Behaviors: "confident and sassy"  (handler om opfoersel. fx. kritisk eller confident.
+                man kan taenke paa det som, Behavior er hvad den goer mens den taenker,
+                Tone er hvordan den skriver svaret.)
+
+Target:
+
+4 T 's:
+Traits (Role, behavior), Task, Tone, Target.
+
+Jeg proevede disse:
+
+Med gemini:
+Tou are an expert chessplayer. Explain the differences in skill between different levels of chessplayers at the ELO levels 500, 1000 ... 2500. The tone should be fun and engaging. The target are 10 year old children.
+
+Med Chat GPT:
+You are a world class chessplayer. Explain the differences in skill between different levels of chessplayers at the ELO levels 500, 1000 ... 2500. The tone should be serius and technical. The target are engineering professors.
+
+Jeg gode passende svar til begge.
+
+-------------------------------------------
+
+downlaod lokal LLM.
+git til https://ollama.com/
+og downloadede
+
+JEg spurgte derefter grok hvilken model den ville anbefale til svake laptops fro coding. fik svaret:
+
+On a weak laptop the rule is simple: pull the smallest coding-specialized model that still writes usable code, then keep context short. Bigger models will load, then crawl or swap your machine to death.
+Assume “weak” means 8 GB RAM (maybe 16 GB if you are lucky), little or no dedicated GPU, and the OS + IDE already eating a few GB.
+Start with these
+Best first pull (most people):
+Bashollama pull qwen2.5-coder:7b
+~4.7 GB download. This is still the workhorse local coder for 8 GB class machines: functions, refactors, explanations, tests.
+If 7B is too slow or RAM spikes:
+Bashollama pull qwen2.5-coder:3b
+~1.9 GB. Noticeably weaker on multi-file reasoning, but fine for snippets and “what does this function do?”
 
 
+---------------------------------------------------------------------
+What to pick by RAM
+
+MachinePull theseAvoid8 GB, CPU / weak iGPUqwen2.5-coder:3b + qwen2.5-coder:1.5b, or qwen3:4b14B, 32B, anything “30b”8 GB with a little GPU (6–8 GB VRAM)qwen2.5-coder:7bRunning two 7B models at once16 GB RAMqwen2.5-coder:7b (daily) and try qwen2.5-coder:14b only if it stays snappy32B / 70B
+A 14B Q4 file is ~9 GB. On 16 GB that can run, but the OS + VS Code + browser will fight it. On 8 GB it will swap.
+Practical setup
+Bash# daily coding chat
+ollama run qwen2.5-coder:7b
+
+# see what is loaded and how much RAM it uses
+ollama ps
+Keep context modest (num_ctx 2048–4096). Long context is what kills weak laptops, not just parameter count.
+Use the model from an editor (Continue.dev, Cline, Aider, Zed) rather than pasting whole repos into the terminal.
+Do not start with CodeLlama. Qwen2.5-Coder at the same size is simply better at code now.
+What “usable coding” means at this size
+A 3B–7B local model will:
+
+write small functions and boilerplate
+explain and comment code
+generate tests for one file
+suggest fixes when you paste the error
+
+It will not reliably:
+
+refactor a whole project
+hold a large repo in context
+match Claude / GPT-class multi-file agents
+
+That is a hardware limit, not an Ollama setting.
+If you tell me your exact RAM (and whether you have any NVIDIA/AMD GPU or Apple Silicon), I can narrow this to one primary model and one autocomplete model.
+
+--------------------------------------------------------------------------------
+
+Opgave: find en cloud AI hvor man kan saette personlig kontext.
+
+-------------------------------------------------------------------------
+
+1. Mandatory:
+
+Deployment: helt ok at det er vores egen maskine.
+
+Vi skal bygge en toolchain oven paa llm.
+eks. openclow eller hermes.... mange andre.
+
+---------------------------------------------------------------------------------
+
+hutgig op ollama
+mange folk wllm
+ollama.tpp
+
+https://openwebui.com/
+
+hermes -- en af de faa agenter der kan laere af sine egne fejl
 
 
+---- chris -- ollama lokalt og openwebui i docker
+---- til min egen maskine, med 8 gb ram,
+bedre at indstallere openwebui med python.
+
+install openwebui med python:
 
 
+Ray villaboos's 4T framework.
 
+++++++++++++++++++++++++++++++++++++++++++
+opgave til mig selv:
+chris fortaeller at man med claude kan styre context.
+proev at soege paa kontextstyring med "slash commands"
+for st styre hvad AI instansen skal huske eller glemme.
 
+++++++++++++++++++++++++++++++++++++++++++
 
 
