@@ -1,0 +1,340 @@
+Fresh setup on another Windows PC — human step-by-step guide
+============================================================
+
+Use this on a NEW machine (PC2, PC3, or a friend’s PC).
+Companion for AIs: chrsetup/fresh_setup_ai.txt
+
+Before you start
+----------------
+1. Pick a folder for big programs (called PROGRAMMER_ROOT below).
+   On the home PC this was: D:\TESTCMLDDRIVE\PROGRAMMER
+   On this PC use your own data drive, for example:
+     D:\PROGRAMMER
+   Write yours here: PROGRAMMER_ROOT = _______________________
+
+2. Decide which setup you need today:
+
+   A) WORKER ONLY (recommended first)
+      Tailscale + Ollama + one model
+      Enough to be a “friend” that answers AI requests
+
+   B) FULL SETUP (like the home PC)
+      Worker pieces + Docker + LiteLLM + Hermes
+      Needed only if THIS PC should be the orchestrator
+
+3. Always use a NEW PowerShell window after installers or after
+   changing environment variables.
+
+4. Important do-nots:
+   - Do NOT set OLLAMA_HOST permanently to a Tailscale address (100.x)
+   - Do NOT point Hermes at http://100.x.x.x:11434
+   - Do NOT put Ollama or Hermes inside Docker
+   - Do NOT create a separate Tailscale network; join the TEAM tailnet
+
+
+================================================================
+PART A — WORKER ONLY
+================================================================
+
+Step A1 — Install Tailscale
+---------------------------
+1. Open: https://pkgs.tailscale.com/stable/#windows
+2. Download the amd64 .msi (Intel/AMD). Use ARM MSI only on ARM PCs.
+3. Install and open Tailscale.
+4. Log in to the SAME team network your home PC / friends use.
+   (Optional: use a different Google account so you look like another
+   person on the Tailscale admin page.)
+
+Verify:
+  In PowerShell run:
+    tailscale status
+    tailscale ip -4
+
+  Pass if:
+  - You are logged in (not “NeedsLogin”)
+  - You get an IP like 100.x.y.z
+  - Write it down: This PC Tailscale IP = _______________
+  - Ideally you can see the home PC (desktop-gp6fdne / 100.96.116.71)
+
+
+Step A2 — Create Ollama folders and set model path
+--------------------------------------------------
+In PowerShell (replace the path with YOUR PROGRAMMER_ROOT):
+
+  New-Item -ItemType Directory -Force -Path "D:\YOUR\PROGRAMMER\Ollama"
+  New-Item -ItemType Directory -Force -Path "D:\YOUR\PROGRAMMER\Ollama\models"
+  [Environment]::SetEnvironmentVariable("OLLAMA_MODELS", "D:\YOUR\PROGRAMMER\Ollama\models", "User")
+
+Close PowerShell. Open a NEW PowerShell.
+
+Verify:
+  [Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+  → must show your ...\Ollama\models path
+
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+  → both should be empty (print nothing)
+
+  If Machine is not empty: open PowerShell as Administrator and run:
+    [Environment]::SetEnvironmentVariable("OLLAMA_HOST", $null, "Machine")
+
+
+Step A3 — Install Ollama on the data drive
+------------------------------------------
+In PowerShell:
+
+  $env:OLLAMA_INSTALL_DIR = "D:\YOUR\PROGRAMMER\Ollama"
+  irm https://ollama.com/install.ps1 | iex
+
+Close PowerShell. Open a NEW one.
+
+Start the server (leave this window open):
+
+  & "D:\YOUR\PROGRAMMER\Ollama\ollama.exe" serve
+
+Open a SECOND PowerShell and verify:
+
+  ollama --version
+  $env:OLLAMA_HOST
+  curl.exe --noproxy "*" -s --max-time 10 http://127.0.0.1:11434/api/tags
+
+Pass if:
+  - Version prints (e.g. 0.33.x)
+  - OLLAMA_HOST is empty
+  - curl returns JSON (models list may be empty at first)
+  - No error mentioning 100.x or timeout to Tailscale
+
+
+Step A4 — Download the model and test locally
+---------------------------------------------
+In the second PowerShell:
+
+  ollama pull qwen2.5-coder:7b
+  ollama list
+  ollama run qwen2.5-coder:7b "Reply with the single word: pong"
+
+Also check where files landed:
+
+  Get-ChildItem "D:\YOUR\PROGRAMMER\Ollama\models"
+  Get-ChildItem "$env:USERPROFILE\.ollama\models" -ErrorAction SilentlyContinue
+
+Pass if:
+  - Reply is pong
+  - Model files are under your PROGRAMMER_ROOT\Ollama\models
+  - Prefer that C:\Users\...\.ollama\models is empty/missing
+
+
+Step A5 — Open Ollama to Tailscale (temporary, for work sessions)
+-----------------------------------------------------------------
+1. Quit Ollama completely: system tray ^ → Ollama → Quit Ollama
+   Also stop any old “serve” PowerShell window (Ctrl+C).
+
+2. In a NEW PowerShell (leave it open while working):
+
+  $env:OLLAMA_HOST = "0.0.0.0:11434"
+  & "D:\YOUR\PROGRAMMER\Ollama\ollama.exe" serve
+
+3. In a second PowerShell, test BOTH:
+
+  curl.exe --noproxy "*" -s --max-time 10 http://127.0.0.1:11434/api/tags
+  curl.exe --noproxy "*" -s --max-time 10 http://YOUR.TAILSCALE.IP:11434/api/tags
+
+Pass if BOTH return JSON with qwen2.5-coder:7b.
+
+4. On the HOME PC (orchestrator), test:
+
+  curl.exe --noproxy "*" -s --max-time 10 http://PC2.TAILSCALE.IP:11434/api/tags
+
+Pass if home PC can see this PC’s models.
+
+WORKER ONLY is finished when step 4 passes.
+You can stop here until you need this PC to be orchestrator.
+
+
+================================================================
+PART B — FULL SETUP (orchestrator like home PC)
+================================================================
+Do Part A first. Keep Ollama running with 0.0.0.0 as in Step A5.
+
+
+Step B1 — Install Docker Desktop
+--------------------------------
+1. Download Docker Desktop for Windows and install
+   (it will set up WSL; that is normal).
+2. Start Docker Desktop and wait until it is running.
+
+Verify:
+
+  docker --version
+  docker compose version
+  docker run --rm hello-world
+
+Pass if you see version numbers and “Hello from Docker!”
+
+
+Step B2 — Get the project and create .env
+-----------------------------------------
+1. Copy or clone the LLM-mandatory-1 repo onto this PC.
+2. In PowerShell:
+
+  cd PATH\TO\LLM-mandatory-1
+  Copy-Item .env.example .env
+  notepad .env
+
+3. Fill in:
+  - LITELLM_MASTER_KEY = a long secret
+    Easy make one:
+      "sk-" + [guid]::NewGuid().ToString("N")
+  - NODE_A_IP … NODE_F_IP = Tailscale IPs of the machines in the fleet
+
+  First test on this PC alone: put THIS PC’s Tailscale IP in all six.
+  Later: put different friends’/PCs’ IPs for different roles.
+
+Verify:
+  Get-Content .env
+  → key is set, all NODE_ lines have 100.x values
+  → do not commit .env to git
+
+
+Step B3 — Models in litellm-config (rehearsal note)
+--------------------------------------------------
+Team target models are llama3.1:8b and qwen2.5-coder:14b.
+For a first test with only qwen2.5-coder:7b installed, the config may
+already be temporarily set to 7b (as on the home PC). If chat fails with
+“model not found”, ask your AI helper to remap to 7b for rehearsal.
+
+
+Step B4 — Start LiteLLM
+-----------------------
+Docker Desktop running. Ollama still on 0.0.0.0. Then:
+
+  cd PATH\TO\LLM-mandatory-1
+  docker compose up -d
+
+First run downloads an image (can take a few minutes).
+
+Then:
+
+  $key = (Get-Content .env | Where-Object { $_ -match '^LITELLM_MASTER_KEY=' }) -replace '^LITELLM_MASTER_KEY=',''
+  curl.exe --noproxy "*" -s --max-time 30 http://127.0.0.1:4000/v1/models -H "Authorization: Bearer $key"
+
+Pass if JSON lists: architect, techlead, coder, tester, docs, deployer, worker
+
+
+Step B5 — One chat through LiteLLM
+----------------------------------
+In the project folder:
+
+  Set-Content smoke-body.json '{"model":"coder","messages":[{"role":"user","content":"Reply with the single word: pong"}]}'
+  $key = (Get-Content .env | Where-Object { $_ -match '^LITELLM_MASTER_KEY=' }) -replace '^LITELLM_MASTER_KEY=',''
+  curl.exe --noproxy "*" -s --max-time 180 http://127.0.0.1:4000/v1/chat/completions -H "Authorization: Bearer $key" -H "Content-Type: application/json" --data-binary @smoke-body.json
+
+Pass if the JSON contains "pong" (or Pong).
+
+If this fails, do not install Hermes yet — fix LiteLLM/Ollama first.
+
+
+Step B6 — Install Hermes
+------------------------
+Need git installed. Then:
+
+  irm https://hermes-agent.nousresearch.com/install.ps1 | iex
+
+When asked how to set up:
+  - Choose 3 = Blank Slate
+    (Do NOT choose 1 Nous Portal / online-only)
+
+When asked for provider:
+  - Custom endpoint (enter URL manually)
+
+Enter:
+  - API base URL: http://127.0.0.1:11434/v1
+  - API key: leave blank or “local”
+  - Model: qwen2.5-coder:7b
+
+Other prompts (typical good choices on home PC):
+  - Chart/completions style: chat completions
+  - Display name: something like ollama-local-this-pc
+  - Terminal backend: keep current (local)
+  - Toolset: start with everything disabled
+
+New PowerShell:
+
+  hermes --version
+  hermes config get model
+
+Pass if:
+  - provider: custom
+  - default: qwen2.5-coder:7b
+  - base_url: http://127.0.0.1:11434/v1
+
+
+Step B7 — Turn off “thinking” and test Hermes → Ollama
+------------------------------------------------------
+  hermes
+
+At the prompt type:
+
+  /reasoning none --global
+
+Wait until it says saved. Then type:
+
+  Reply with the single word: pong
+
+Pass if you get Pong / pong.
+
+Also:
+
+  hermes chat -q "Reply with the single word: pong"
+
+If HTTP 400 about thinking: repeat /reasoning none --global.
+
+
+Step B8 — Point Hermes at LiteLLM
+---------------------------------
+Only after Step B5 passed.
+
+  hermes config set model.base_url http://127.0.0.1:4000/v1
+
+Set the same key as in .env:
+
+  $key = (Get-Content PATH\TO\LLM-mandatory-1\.env | Where-Object { $_ -match '^LITELLM_MASTER_KEY=' }) -replace '^LITELLM_MASTER_KEY=',''
+  hermes config set model.api_key $key
+  hermes config get model
+
+Then:
+
+  hermes chat -q "Reply with the single word: pong" -m coder
+
+Pass if reply is pong and base_url shows http://127.0.0.1:4000/v1.
+
+If it breaks badly, roll back:
+
+  hermes config set model.base_url http://127.0.0.1:11434/v1
+
+FULL SETUP is finished when Step B8 passes.
+
+
+================================================================
+PART C — After reboot (quick checklist)
+================================================================
+[ ] Tailscale connected (tailscale ip -4)
+[ ] OLLAMA_HOST User/Machine still empty (not 100.x)
+[ ] Quit tray Ollama, then:
+      $env:OLLAMA_HOST = "0.0.0.0:11434"
+      & "D:\YOUR\PROGRAMMER\Ollama\ollama.exe" serve
+[ ] curl 127.0.0.1 and your 100.x :11434/api/tags both work
+[ ] If orchestrating: start Docker Desktop, then docker compose up -d
+[ ] If driving: hermes (base_url :4000)
+
+
+================================================================
+PART D — What to write down for the fleet
+================================================================
+Hostname: ____________________
+Tailscale IP: ____________________
+Role today: worker only / full orchestrator
+Model installed: qwen2.5-coder:7b (or other: ________)
+Home PC can curl me: yes / no
+
+Give this info to the person/AI updating the home PC .env NODE_* lines.

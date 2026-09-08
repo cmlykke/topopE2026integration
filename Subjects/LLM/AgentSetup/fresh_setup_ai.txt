@@ -1,0 +1,323 @@
+FRESH WINDOWS MACHINE SETUP — AI / LLM HANDOFF
+Generated for assistants with NO prior session memory.
+Human companion: chrsetup/fresh_setup_human.txt
+Source truth: chrsetup/* + repo README.md, docker-compose.yml, litellm-config.yaml, .env.example
+
+------------------------------------------------------------------------
+0. HOW TO USE THIS FILE
+------------------------------------------------------------------------
+You are setting up (or continuing setup on) a Windows PC for the
+LLM-mandatory-1 toolchain so it can join a multi-machine Tailscale fleet.
+
+Read this file fully before acting. Prefer small steps for the human:
+  - If chrsetup/currentToDO.txt and whatihavedone.txt exist on this clone,
+    use that micro-task pattern (one task → human reports → next task).
+  - If not, follow fresh_setup_human.txt phases and verify after each.
+
+Do NOT dump this entire file on the user. Give one practical step at a time
+unless they ask for the full plan.
+
+Paths: home PC used D:\TESTCMLDDRIVE\PROGRAMMER\... Replace with THIS
+machine’s data-drive program root. Call it PROGRAMMER_ROOT below.
+Example: PROGRAMMER_ROOT = D:\TESTCMLDDRIVE\PROGRAMMER
+Username / Hermes home will be under C:\Users\<ThisUser>\AppData\Local\hermes\
+
+------------------------------------------------------------------------
+1. PROJECT END GOAL (why anything is installed)
+------------------------------------------------------------------------
+Team of 6 (user rehearses on 3 PCs). Any machine can be orchestrator;
+others are workers. There is NO special “slave Hermes mode”.
+
+  Tailscale  — every machine on the SAME team tailnet
+  Ollama     — worker; :11434 reachable at that PC’s Tailscale 100.x
+  LiteLLM    — localhost :4000; role names → peer Tailscale Ollama IPs
+  Hermes     — only when that person drives; talks to local LiteLLM
+               http://127.0.0.1:4000/v1 (never to a peer’s Hermes)
+
+“Slave” = that box’s Ollama answers HTTP. Hermes delegate_task stays
+inside the Hermes process you opened; it does not start Hermes on peers.
+
+Repo role routing (litellm-config.yaml + compose extra_hosts):
+  architect, techlead, coder, tester, docs, deployer, worker(pool)
+  NODE_A_IP … NODE_F_IP in .env = Tailscale IPs of the six Ollama nodes.
+
+------------------------------------------------------------------------
+2. HARD RULES (never violate — learned on home PC)
+------------------------------------------------------------------------
+R1. NEVER set User or Machine OLLAMA_HOST permanently to a Tailscale 100.x
+    address. That made ollama list / Hermes dial 100.x and time out while
+    nothing listened on localhost. Clear both scopes if set.
+R2. Hermes model.base_url is ALWAYS 127.0.0.1 — first
+    http://127.0.0.1:11434/v1 (direct Ollama), later
+    http://127.0.0.1:4000/v1 (LiteLLM). NEVER http://100.x:11434/v1.
+R3. Tailscale 100.x belongs in: .env NODE_*_IP, peer curls, fleet map.
+R4. When exposing Ollama to Docker/peers: session-only
+      $env:OLLAMA_HOST = "0.0.0.0:11434"
+    then ollama serve. Prefer 0.0.0.0 over permanent 100.x (README’s 100.x
+    serve pattern conflicts with R1; use 0.0.0.0 + Tailscale IP in .env).
+R5. Do NOT put Ollama or Hermes in Docker. Docker is for LiteLLM only.
+R6. Do NOT install LiteLLM “in WSL” as a separate project. Use
+    docker compose from the repo on Windows (Docker Desktop / WSL2 backend
+    is fine; workspace stays on Windows paths).
+R7. Set OLLAMA_MODELS to the data-drive models folder BEFORE first Ollama
+    start, or models land on C:\Users\<you>\.ollama\models.
+R8. qwen2.5-coder:7b rejects “thinking” → HTTP 400. In interactive hermes:
+      /reasoning none --global
+    hermes config set agent.reasoning_effort does not stick reliably.
+R9. Quit Ollama via tray (^ → Quit Ollama). App respawns if you only kill
+    one process. New PowerShell after changing User env vars.
+R10. Hermes install: Blank Slate (option 3), NOT Nous Portal Quick Setup.
+R11. Do not hermes update while copying/rehearsing the setup.
+R12. Ollama has no auth — firewall :11434 to Tailscale/trusted only.
+R13. Windows curl to localhost may hang behind a proxy. Use:
+      curl.exe --noproxy "*" ...
+    or Invoke-RestMethod. For JSON POST bodies in PowerShell, prefer
+      curl.exe ... --data-binary @smoke-body.json
+    ( -d $body often produces Invalid JSON).
+
+------------------------------------------------------------------------
+3. TWO INSTALL PROFILES
+------------------------------------------------------------------------
+WORKER-ONLY (enough to be a “friend slave”):
+  Tailscale + Ollama + model + serve 0.0.0.0 when working.
+  No Docker, no Hermes, no LiteLLM required.
+
+FULL ORCHESTRATOR (identical to home PC capability):
+  Worker pieces + Docker Desktop + repo clone + .env + LiteLLM compose
+  + Hermes → :4000.
+
+For rehearsal “fake friends”, start WORKER-ONLY on PC2/PC3; add full
+stack later when that box should drive.
+
+------------------------------------------------------------------------
+4. REFERENCE: HOME PC THAT ALREADY WORKS (do not reinstall there)
+------------------------------------------------------------------------
+Hostname: desktop-gp6fdne
+User: Testcmluser
+Tailscale IP: 100.96.116.71  (older logs 100.91.254.5 are STALE)
+PROGRAMMER_ROOT: D:\TESTCMLDDRIVE\PROGRAMMER
+Ollama: 0.33.3 native on D:\...\Ollama ; models on D:\...\Ollama\models
+Model: qwen2.5-coder:7b (dae161e27b0e)
+Docker Desktop 29.7.2, Compose v5.5.0
+Hermes v0.21.0; home C:\Users\Testcmluser\AppData\Local\hermes\
+Proven:
+  Hermes → :11434 pong; LiteLLM /v1/models; LiteLLM coder → pong;
+  Hermes → :4000 -m coder → pong
+Rehearsal: litellm-config.yaml temporarily all roles → qwen2.5-coder:7b
+  (restore llama3.1:8b / qwen2.5-coder:14b before team submission)
+Home .env: all NODE_*_IP still 100.96.116.71 until peers are live.
+
+chrsetup progress pointer lives in 020_nextsetup.txt — update it when
+advancing if that file is present on the clone.
+
+------------------------------------------------------------------------
+5. PREREQUISITES ON THE NEW WINDOWS PC
+------------------------------------------------------------------------
+- Windows 10/11, admin rights for installers
+- Plenty of disk on a data drive for models (~5GB+ for 7b; more for 14b)
+- Git (for Hermes install method / repo clone)
+- For Hermes: git; uv/python toolchain often pulled by installer; Node
+  mentioned in home log — install if Hermes installer demands it
+- Internet for pulls (Ollama model, Docker image, Tailscale, Hermes)
+- Access to the SAME team Tailscale tailnet (invite if using another Google
+  account to mimic a friend)
+
+------------------------------------------------------------------------
+6. PROCEDURE — WORKER-ONLY (recommended first on PC2/PC3)
+------------------------------------------------------------------------
+
+### 6.1 Tailscale
+- Download Windows amd64 .msi from https://pkgs.tailscale.com/stable/#windows
+  (not the .exe; use ARM MSI only on ARM)
+- Install; login to SAME team tailnet (optional: different Google account)
+- Verify:
+    tailscale status
+    tailscale ip -4
+  Must show Logged in, a unique 100.x, and ideally home PC visible
+  (desktop-gp6fdne / 100.96.116.71).
+- Do NOT create a separate private home-only tailnet for rehearsal.
+
+### 6.2 Folders + OLLAMA_MODELS (before first Ollama start)
+  New-Item -ItemType Directory -Force -Path "$PROGRAMMER_ROOT\Ollama"
+  New-Item -ItemType Directory -Force -Path "$PROGRAMMER_ROOT\Ollama\models"
+  [Environment]::SetEnvironmentVariable("OLLAMA_MODELS", "$PROGRAMMER_ROOT\Ollama\models", "User")
+  New PowerShell window. Confirm:
+  [Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+  Confirm User + Machine OLLAMA_HOST are empty:
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+  If Machine set: Admin PowerShell → SetEnvironmentVariable OLLAMA_HOST $null Machine
+
+### 6.3 Install Ollama on data drive
+  $env:OLLAMA_INSTALL_DIR = "$PROGRAMMER_ROOT\Ollama"
+  irm https://ollama.com/install.ps1 | iex
+  New window:
+  ollama --version
+  (Start serve if needed)
+  & "$PROGRAMMER_ROOT\Ollama\ollama.exe" serve
+  Other window:
+  curl.exe --noproxy "*" -s --max-time 10 http://127.0.0.1:11434/api/tags
+  Expect JSON (models may be empty). $env:OLLAMA_HOST must be empty /
+  not 100.x.
+
+### 6.4 Pull model + local pong
+  ollama pull qwen2.5-coder:7b
+  ollama run qwen2.5-coder:7b "Reply with the single word: pong"
+  Confirm files under $PROGRAMMER_ROOT\Ollama\models (not only under
+  %USERPROFILE%\.ollama\models).
+
+### 6.5 Expose as Tailscale worker (session only)
+  Tray: Quit Ollama.
+  $env:OLLAMA_HOST = "0.0.0.0:11434"
+  & "$PROGRAMMER_ROOT\Ollama\ollama.exe" serve
+  Leave window open. Expect Listening on [::]:11434 or 0.0.0.0:11434.
+  Verify on THIS PC:
+    curl.exe --noproxy "*" -s --max-time 10 http://127.0.0.1:11434/api/tags
+    curl.exe --noproxy "*" -s --max-time 10 http://<this-pc-tailscale-ip>:11434/api/tags
+  Verify FROM home PC (or orchestrator):
+    curl.exe --noproxy "*" -s --max-time 10 http://<peer-tailscale-ip>:11434/api/tags
+  Optional: Windows Firewall allow TCP 11434 from Tailscale interface only.
+
+WORKER-ONLY DONE when peer curl from orchestrator returns the model list.
+
+------------------------------------------------------------------------
+7. PROCEDURE — FULL ORCHESTRATOR (add after worker works)
+------------------------------------------------------------------------
+
+### 7.1 Docker Desktop
+- Install from Docker’s Windows installer (brings WSL2 backend).
+- Verify:
+    docker --version
+    docker compose version
+    docker run --rm hello-world
+- Disk for Docker images often on C:; that is OK. Do not use Docker’s WSL
+  distro as the project workspace.
+
+### 7.2 Clone / copy the repo
+- Need: docker-compose.yml, litellm-config.yaml, .env.example, docs/
+- Create .env (never commit):
+    Copy-Item .env.example .env
+  Fill:
+    LITELLM_MASTER_KEY = "sk-" + [guid]::NewGuid().ToString("N")
+    NODE_A_IP … NODE_F_IP = Tailscale 100.x of fleet members
+  Local smoke on a single box: set all six NODE_* to THIS PC’s 100.x.
+  Multi-box: split IPs across peers (same mapping on every orchestrator’s
+  .env, or shared fleet file).
+
+### 7.3 litellm-config models
+- Team target: llama3.1:8b on architect/techlead/docs;
+  qwen2.5-coder:14b on coder/tester/deployer/worker.
+- Rehearsal on small GPUs: temporarily set all ollama_chat/* to
+  qwen2.5-coder:7b (home PC did this). Mark clearly; restore before submit.
+- Compose mounts litellm-config.yaml and MUST pass --config (already in
+  docker-compose.yml).
+
+### 7.4 Start LiteLLM
+  Ollama must be on 0.0.0.0 (section 6.5) so the container can reach the
+  host via Tailscale IP in extra_hosts (127.0.0.1 inside container ≠ host).
+  cd <repo>
+  docker compose up -d
+  $key = (Get-Content .env | Where-Object { $_ -match '^LITELLM_MASTER_KEY=' }) -replace '^LITELLM_MASTER_KEY=',''
+  curl.exe --noproxy "*" -s --max-time 30 http://127.0.0.1:4000/v1/models -H "Authorization: Bearer $key"
+  Expect ids: architect, techlead, coder, tester, docs, deployer, worker
+
+  Chat smoke (prefer file body on PowerShell):
+  Set-Content smoke-body.json '{"model":"coder","messages":[{"role":"user","content":"Reply with the single word: pong"}]}'
+  curl.exe --noproxy "*" -s --max-time 180 http://127.0.0.1:4000/v1/chat/completions -H "Authorization: Bearer $key" -H "Content-Type: application/json" --data-binary @smoke-body.json
+  Expect message content pong.
+
+### 7.5 Hermes (native Windows)
+  Prerequisites: git; whatever the installer asks (uv/python/node).
+  irm https://hermes-agent.nousresearch.com/install.ps1 | iex
+  Wizard:
+    - Choose 3 Blank Slate (NOT 1 Nous Portal)
+    - Provider: Custom endpoint (enter URL manually) — option ~40 in long list
+    - First: API base http://127.0.0.1:11434/v1 , model qwen2.5-coder:7b,
+      key blank/local; prove pong BEFORE pointing at LiteLLM
+    - Display name: something local
+    - Terminal backend: keep local
+    - Toolset: start with everything disabled (or as preferred later)
+  After install:
+    hermes config get model
+    Must be provider custom, base_url 127.0.0.1:11434/v1 initially.
+  Reasoning:
+    hermes
+    /reasoning none --global
+    then pong test.
+  Optional context (Hermes may demand >=64k; non-blocking if pong works):
+    hermes config set model.context_length 65536
+    hermes config set model.ollama_num_ctx 65536
+    User env OLLAMA_CONTEXT_LENGTH=65536 was tried on home PC.
+  Do not hermes update yet.
+  Known fail: `ollama launch hermes` timed out — use official install.ps1.
+
+### 7.6 Point Hermes at LiteLLM (only after :4000 chat smoke works)
+  hermes config set model.base_url http://127.0.0.1:4000/v1
+  hermes config set model.api_key <same as LITELLM_MASTER_KEY>
+  hermes chat -q "Reply with the single word: pong" -m coder
+  Rollback if broken:
+  hermes config set model.base_url http://127.0.0.1:11434/v1
+
+FULL ORCHESTRATOR DONE when Hermes -m coder pongs via :4000.
+
+------------------------------------------------------------------------
+8. WIRING A NEW WORKER INTO AN EXISTING ORCHESTRATOR
+------------------------------------------------------------------------
+On orchestrator (e.g. home PC):
+  1. Confirm curl to peer 100.x:11434/api/tags
+  2. Edit .env NODE_* so at least one role points at the new peer IP
+  3. docker compose up -d --force-recreate
+  4. Chat completion for that role name
+  5. Update shared fleet map: hostname → 100.x → model tags
+
+------------------------------------------------------------------------
+9. AFTER REBOOT CHEATSHEET
+------------------------------------------------------------------------
+  1. Confirm OLLAMA_HOST User/Machine still empty (not 100.x)
+  2. Tailscale up: tailscale ip -4
+  3. Quit tray Ollama; session:
+       $env:OLLAMA_HOST = "0.0.0.0:11434"
+       & "$PROGRAMMER_ROOT\Ollama\ollama.exe" serve
+  4. If orchestrating: Docker Desktop → docker compose up -d
+  5. Hermes only if driving; base_url :4000 with key
+
+------------------------------------------------------------------------
+10. CHRSETUP FILE ROLES (if present on this clone)
+------------------------------------------------------------------------
+020_nextsetup.txt      High-level roadmap for LLMs; keep progress updated
+currentToDO.txt        ONE human micro-task
+whatihavedone.txt      Human pastes evidence; clear/rewrite each task
+setupPaaHjemmePC.txt   Narrative of first home install (includes mistakes)
+014_…                  Condensed Hermes+Ollama Windows notes
+004_…                  End-goal description
+018_…                  Older handoff snapshot
+fresh_setup_ai.txt     THIS file
+fresh_setup_human.txt  Human step guide with verify checkboxes
+
+------------------------------------------------------------------------
+11. FLEET MAP TEMPLATE
+------------------------------------------------------------------------
+PC1 home  desktop-gp6fdne  100.96.116.71  orchestrator+worker  7b
+PC2       _______________  ____________  worker (pending)
+PC3       _______________  ____________  worker (pending)
+Friends already on same tailnet examples (from home status; may change):
+  atlas 100.120.28.32, etc.
+
+------------------------------------------------------------------------
+12. WHAT “SUCCESS” LOOKS LIKE FOR A NEW MACHINE
+------------------------------------------------------------------------
+Worker-only:
+  [ ] Unique Tailscale 100.x on team tailnet
+  [ ] ollama list shows qwen2.5-coder:7b on data drive
+  [ ] Local 127.0.0.1:11434/api/tags OK
+  [ ] This PC’s 100.x:11434/api/tags OK with session 0.0.0.0 bind
+  [ ] Orchestrator can curl this PC’s 100.x:11434/api/tags
+  [ ] User/Machine OLLAMA_HOST still NOT permanent 100.x
+
+Full orchestrator (additional):
+  [ ] docker hello-world OK
+  [ ] .env present (gitignored) with key + NODE_* IPs
+  [ ] curl :4000/v1/models with Bearer key lists roles
+  [ ] chat completions coder → pong
+  [ ] Hermes base_url :4000, api_key set, -m coder → pong
+  [ ] /reasoning none --global persisted for 7b

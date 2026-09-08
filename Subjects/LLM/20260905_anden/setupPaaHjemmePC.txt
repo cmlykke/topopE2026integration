@@ -1,0 +1,470 @@
+
+2026-09-06 kl. 9.02 installation of PC
+
+Use PowerShell. After any installer, close that window and open a new one so PATH updates.
+
+installthe programs here:
+D:\TESTCMLDDRIVE\PROGRAMMER
+
+Create these first in Explorer or PowerShell:
+
+D:\TESTCMLDDRIVE\PROGRAMMER\Ollama
+D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+
+I can do this in powershell with this command:
+
+´´´
+New-Item -ItemType Directory -Path "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama" -Force
+New-Item -ItemType Directory -Path "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models" -Force
+
+´´´
+
+Download Docker Desktop Installer.exe from Docker’s Windows install page.
+install docker desktop. it should install WSL as well.
+
+after installation, open docker and open powershell.
+run
+´´´
+docker --version
+docker compose version
+docker run --rm hello-world
+´´´
+
+i should get this:
+"""
+PS C:\Users\Testcmluser> docker --version
+Docker version 29.7.2, build a7dcaa6
+PS C:\Users\Testcmluser> docker compose version
+Docker Compose version v5.5.0
+PS C:\Users\Testcmluser> docker run --rm hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+4f55086f7dd0: Pull complete
+d5e71e642bf5: Download complete
+Digest: sha256:5dd0d3e6e255913fc30f90b9f2b1d359cc2cbdb48090cc4b65f1676e203243cc
+Status: Downloaded newer image for hello-world:latest
+Hello from Docker!
+"""
+
+<<<<<<<<<<<<<<<<<<<<<<<<<< docker and wsl is installed. now install Ollama
+
+run this in powershell
+
+PS C:\Users\Testcmluser> New-Item -ItemType Directory -Force -Path "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama"
+>> New-Item -ItemType Directory -Force -Path "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models"
+>> [Environment]::SetEnvironmentVariable("OLLAMA_MODELS", "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models", "User")
+
+
+check med dette:
+PS C:\Users\Testcmluser> [Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+PS C:\Users\Testcmluser>
+
+
+install olama with defined directory
+´´´
+$env:OLLAMA_INSTALL_DIR="D:\TESTCMLDDRIVE\PROGRAMMER\Ollama"
+irm https://ollama.com/install.ps1 | iex
+´´´
+result:
+"""
+>>> Downloading Ollama for Windows...
+######################################## 100.0%
+>>> Installing Ollama...
+>>> Install complete. Run 'ollama' from the command line.
+PS C:\Users\Testcmluser>
+"""
+
+in a new powershell, check the installation:
+´´´
+ollama --version
+curl.exe -s http://127.0.0.1:11434/api/tags
+[Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+Get-ChildItem "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama" | Select-Object Name
+´´´
+you should get this:
+´´´
+PS C:\Users\Testcmluser> ollama --version
+>> curl.exe -s http://127.0.0.1:11434/api/tags
+>> [Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+>> Get-ChildItem "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama" | Select-Object Name
+ollama version is 0.33.3
+{"models":[]}D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+...............
+´´´
+
+now, install the first model:
+´´´
+ollama pull qwen2.5-coder:7b
+Get-ChildItem "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models"
+Get-ChildItem "$env:USERPROFILE\.ollama\models" -ErrorAction SilentlyContinue
+´´´
+get the result
+"""
+pulling manifest
+pulling 60e05f210007: 100% ▕██████████████████████████████████████████████████████████▏ 4.7 GB
+verifying sha256 digest
+writing manifest
+success
+......
+"""
+
+test med dette:
+´´´
+ollama list
+ollama run qwen2.5-coder:7b "Reply with the single word: pong"
+´´´
+resultat:
+"""
+NAME                ID              SIZE      MODIFIED
+qwen2.5-coder:7b    dae161e27b0e    4.7 GB    About a minute ago
+pong
+"""
+check fillocation:
+´´´
+Get-ChildItem "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models"
+Get-ChildItem "$env:USERPROFILE\.ollama\models" -ErrorAction SilentlyContinue
+´´´
+resultat: Directory: D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+next, install Tailscale
+
+Download the MSI (not the .exe)
+Open: https://pkgs.tailscale.com/stable/#windows
+Download the amd64 .msi (Intel/AMD PC). If this is ARM, use the ARM MSI.
+
+New-Item -ItemType Directory -Force -Path "D:\TESTCMLDDRIVE\PROGRAMMER\Tailscale"
+
+use this one:
+tailscale-setup-1.102.3-amd64.msi    (with the current version, not this exact one)
+
+run this to test that talescale works:
+´´´
+tailscale status
+tailscale ip -4
+´´´
+resultat:
+"""
+Logged out.
+no current Tailscale IPs; state: NeedsLogin
+PS C:\Users\Testcmluser>
+"""
+
+if i have issues with tailscale,
+i can run this:
+
+´´´
+Stop-Process -Name tailscale-ipn -Force
+Start-Process "C:\Program Files\Tailscale\tailscale-ipn.exe"
+´´´
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+setup ollama host
+
+close ollama
+
+run  (because ollama only run locally currently)
+´´´
+[Environment]::SetEnvironmentVariable("OLLAMA_HOST", "100.91.254.5:11434", "User")
+[Environment]::SetEnvironmentVariable("OLLAMA_ORIGINS", "*", "User")
+[Environment]::SetEnvironmentVariable("OLLAMA_KEEP_ALIVE", "30m", "User")
+[Environment]::SetEnvironmentVariable("OLLAMA_CONTEXT_LENGTH", "32768", "User")
+´´´
+then restart ollama and run this
+´´´´
+[Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+curl.exe -s http://127.0.0.1:11434/api/tags
+curl.exe -s http://100.91.254.5:11434/api/tags
+´´´´
+result:
+´´´´
+100.91.254.5:11434
+{"models":[{"name":"qwen2.5-coder:7b","model":"qwen2.5-coder:7b","modified_at":"2026-09-06T10:55:00.0894425+02:00","size":4683087561,"digest":"dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364","details":{"parent_model":"","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"7.6B","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":3584},"capabilities":["completion","tools","insert"]}]}
+´´´´
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+set up hermes
+
+make sure uv python version manager is installed
+make sure git is installed
+make sure node.js is installed
+
+´´´´
+PS C:\Users\Testcmluser> ollama launch hermes
+Error: timed out waiting for server to start
+PS C:\Users\Testcmluser>
+´´´´
+´this means hermes needs to be setup.
+run this:
+´´´´
+irm https://hermes-agent.nousresearch.com/install.ps1 | iex
+´´´´
+
+when asked:
+"""""""""""
+[33m
+  How would you like to set up Hermes?[0m
+[2m  Select by number, Enter to confirm.
+[0m
+  [32m(●)[0m  1. Quick Setup (Nous Portal) — free OAuth login, no API keys, model + tools (recommended)
+  (○)  2. Full setup — configure every provider, tool & option yourself (bring your own keys)
+  (○)  3. Blank Slate — everything off except the bare minimum; opt in to each capability
+ """""""""""""""""""
+go with 3 (DO NOT go with 1, that would make it work only online)
+
+when asked: (42 different questions)
+go with "40. Custom endpoint (enter URL manually)"
+
+then enter:
+
+API base   URLhttp://100.91.254.5:11434/v1
+API key    leave blank, or local
+Model       qwen2.5-coder:7b
+Context     32768
+
+when asked: """....2: chart completion...."""
+go with 2
+
+when asked for display name:
+type "ollama-local-cml-stat-pc"
+
+when asked "select terminal backend"
+go with "7: keep current (local)"
+
+when asked about "Toolset:"
+go with "1. start with everything disabled"
+
+
+now close powershell and reopen and run:
+´´´´
+hermes --version
+hermes config get model
+´´´´
+result
+"""
+Hermes Agent v0.21.0 (2026.8.31) · upstream 23375703
+Install directory: C:\Users\Testcmluser\AppData\Local\hermes\hermes-agent
+Install method: git
+Python: 3.11.16
+OpenAI SDK: 2.24.0
+Update available: 6 commits behind — run 'hermes update'
+default: qwen2.5-coder:7b
+provider: custom
+base_url: http://100.91.254.5:11434/v1
+api_mode: chat_completions
+PS C:\Users\Testcmluser>
+"""
+
+test with
+´´´´
+hermes chat -q "Reply with the single word: pong"
+´´´´
+result
+""""
+Failed to initialize agent: Model qwen2.5-coder:7b has a context window of 32,768 tokens, which is below the minimum
+64,000 required by Hermes Agent.
+"""
+
+i have to increase the token size:
+
+press "Ctrl+c" to exit hermes
+then
+make sure ollama server is open
+type
+´´´´
+[Environment]::SetEnvironmentVariable("OLLAMA_CONTEXT_LENGTH", "65536", "User")
+´´´´
+then close ollama by clicking the task bar "^" icon, clicking ollama and selecting "quit ollama"
+then close and reopen both powershell ollama, then
+
+´´´´
+[Environment]::GetEnvironmentVariable("OLLAMA_CONTEXT_LENGTH", "User")
+curl.exe -s http://100.91.254.5:11434/api/tags
+´´´´
+result:
+"""
+65536
+{"models":[{"name":"qwen2.5-coder:7b","model":"qwen2.5-coder:7b","modified_at":"2026-09-06T10:55:00.0894425+02:00","size":4683087561,"digest":"dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364","details":{"parent_model":"","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"7.6B","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":3584},"capabilities":["completion","tools","insert"]}]}
+PS C:\Users\Testcmluser>
+"""
+then
+´´
+hermes config set model.context_length 65536
+hermes config get model
+´´´´
+result:
+""""
+✓ Set model.context_length = 65536 in C:\Users\Testcmluser\AppData\Local\hermes\config.yaml
+default: qwen2.5-coder:7b
+provider: custom
+base_url: http://100.91.254.5:11434/v1
+api_mode: chat_completions
+context_length: 65536
+PS C:\Users\Testcmluser>
+"""
+
+i didnt work, so now:
+
+´´´´
+hermes config set model.context_length 65536
+hermes config set model.ollama_num_ctx 65536
+´´´´
+result:
+""""
+✓ Set model.context_length = 65536 in C:\Users\Testcmluser\AppData\Local\hermes\config.yaml
+✓ Set model.ollama_num_ctx = 65536 in C:\Users\Testcmluser\AppData\Local\hermes\config.yaml
+PS C:\Users\Testcmluser>
+"""
+then
+´´´´
+$body = @{
+  model = "qwen2.5-coder:7b"
+  prompt = "hi"
+  stream = $false
+  keep_alive = "30m"
+  options = @{ num_ctx = 65536 }
+} | ConvertTo-Json -Compress -Depth 5
+
+Invoke-RestMethod -Uri "http://100.91.254.5:11434/api/generate" -Method Post -ContentType "application/json" -Body $body
+ollama ps
+´´´´
+result:
+´´´´
+model                    : qwen2.5-coder:7b
+created_at               : 2026-09-07T17:53:30.0919535Z
+response                 : Hello! How can I assist you today?
+done                     : True
+done_reason              : stop
+context                  : {151644, 8948, 198, 2610...}
+total_duration           : 1356841000
+load_duration            : 2166500
+prompt_eval_count        : 30
+prompt_eval_cached_count : 4
+prompt_eval_duration     : 765748000
+eval_count               : 10
+eval_duration            : 561741000
+NAME                ID              SIZE      PROCESSOR          CONTEXT    UNTIL
+qwen2.5-coder:7b    dae161e27b0e    6.8 GB    39%/61% CPU/GPU    32768      29 minutes from now
+PS C:\Users\Testcmluser>
+´´´´
+
+again it didnt work, so i must aga quit ollama (^ button and selec "quit ollama") and open new powershell
+
+check server:
+´´´´
+curl.exe -s http://100.91.254.5:11434/api/tags
+´´´´
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+proev igen at faa hermes til at virke.
+dette fejlede:
+´´´´
+hermes chat -q "Reply with the single word: pong"
+´´´´´´
+det skyldes at hermes ikke koerte.
+Proev foerst at verificere at ollama er paa maskinen:
+´´´´
+curl.exe -s http://127.0.0.1:11434/api/tags
+ollama list
+´´´´
+result:
+""""
+Error: Head "http://100.91.254.5:11434/": dial tcp 100.91.254.5:11434: connectex: A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.
+PS C:\Users\Testcmluser>
+"""
+Ollama itself is aimed at that Tailscale IP, not this PC. ollama list is dialing 100.91.254.5:11434. Localhost likely has no server.
+Check where it is pointed and whether anything is listening here.
+
+´´´´
+[Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+[Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+$env:OLLAMA_HOST
+Get-Process | Where-Object { $_.ProcessName -match 'ollama' } | Select-Object ProcessName, Id
+curl.exe -s -m 3 http://127.0.0.1:11434/api/tags
+´´´´
+"""""
+100.91.254.5:11434
+100.91.254.5:11434
+ProcessName   Id
+-----------   --
+ollama app  4276
+PS C:\Users\Testcmluser>
+""""
+
+start powershell as administrator and run:
+´´´´
+[Environment]::SetEnvironmentVariable("OLLAMA_HOST", $null, "Machine")
+[Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+´´´´
+then
+´´´´
+Get-Process | Where-Object { $_.ProcessName -match 'ollama' } | Stop-Process -Force
+Start-Sleep -Seconds 2
+´´´´
+
+start ollama:
+´´´´
+Get-Process | Where-Object { $_.ProcessName -match 'ollama' } | Stop-Process -Force
+Start-Sleep -Seconds 2
+& "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\ollama.exe" serve
+´´´´
+then in a new powershell:
+´´´´
+$env:OLLAMA_HOST
+curl.exe -s http://127.0.0.1:11434/api/tags
+ollama list
+´´´´
+now we must point hermes to local host instead of the old tailscale URL
+´´´´
+hermes config set model.base_url http://127.0.0.1:11434/v1
+hermes config get model
+hermes config get model.base_url
+´´´´
+then, new powershell (ollama still running in separate window)
+´´´´
+hermes chat -q "Reply with the single word: pong"
+´´´´
+result:
+"""
+....
+HTTP 400: "qwen2.5-coder:7b" does not support thinking
+"""
+now try:
+´´´´
+hermes
+´´´´
+When the prompt appears, type: (write over the last message:)
+Welcome to Hermes Agent! Type your message or /help for commands.
+✦ Tip: Failed foreground terminal commands auto-retry up to 3 times with exponential backoff (2s, 4s, 8s).
+Find and fix a failing test
+´´´´
+/reasoning none --global
+´´´´
+result:
+"""
+️  /reasoning none --global
+  ✓ Reasoning effort set to 'none' (saved to config)
+ ⚕ qwen2.5-coder:7b │ ctx -- │ [░░░░░░░░░░] -- │ 4m │ ⏲ 0s
+ Find and fix a failing test
+"""
+then type:
+´´´´
+Reply with the single word: pong
+´´´´
+denne gang virkede det og jeg fik ordet Pong tilbage !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
+

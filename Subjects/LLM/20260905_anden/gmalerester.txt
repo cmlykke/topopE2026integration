@@ -1,0 +1,116 @@
+
+install ollama
+If Windows Firewall asks, allow private networks.
+´´´powershell´´´
+$env:OLLAMA_INSTALL_DIR="D:\TESTCMLDDRIVE\PROGRAMMER\Ollama"
+irm https://ollama.com/install.ps1 | iex
+´´´
+
+then, close powershell and start new. run:
+´´´
+ollama --version
+curl.exe -s http://127.0.0.1:11434/api/tags
+[Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+´´´
+result
+"""
+ollama version is 0.33.3
+{"models":[]}D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+PS C:\Users\Testcmluser>
+"""
+
+run
+´´´powershell´´´
+[Environment]::SetEnvironmentVariable("OLLAMA_MODELS", "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models", "User")
+´´´
+
+download small model:
+´´´
+ollama pull qwen2.5-coder:7b
+´´´
+test with:
+´´´
+ollama list
+ollama run qwen2.5-coder:7b "Reply with the single word: pong"
+´´´
+result
+"""
+NAME                ID              SIZE      MODIFIED
+qwen2.5-coder:7b    dae161e27b0e    4.7 GB    22 seconds ago
+pong
+"""
+
+double check models location:
+´´´
+Get-ChildItem "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models"
+Get-ChildItem "$env:USERPROFILE\.ollama\models"
+´´´
+
+
+
+
+
+
+
+
+Open Command Prompt as Administrator, cd to the download folder, then:
+´´´
+start /w "" "Docker Desktop Installer.exe" install --accept-license --installation-dir="D:\TESTCMLDDRIVE\PROGRAMMER\Docker" --wsl-default-data-root="D:\TESTCMLDDRIVE\PROGRAMMER\Docker\data"
+´´´
+
+
+
+
+
+Distributed Local LLM Workflow — Setup Guide
+Stack: Hermes Agent (orchestration) → LiteLLM (routing) → Tailscale (transport) → Ollama (inference)
+
+Goal: One workstation runs the agent orchestrator. All model inference is delegated to separate machines on the network. Routing between endpoints is defined in configuration, not rewired by hand.
+
+i must use what my collaborators use:
+https://hermes-agent.nousresearch.com/
+https://tailscale.com/
+https://www.litellm.ai/
+
+keep in mind that the communication between the LLMs on the different computers, need to work over the internet, not just on LAN.
+here is what has been achieved so far:
+Handoff: local LLM setup (Windows)
+User goal: local LLM on this PC, later Hermes as orchestrator, later other LAN machines running Ollama. Take it one step at a time. Do not jump to Hermes/LAN until they ask.
+OS: Windows (hostname DESKTOP-GP6FDNE, user Testcmluser). Not Linux. WSL appeared because Docker Desktop installed it. They should not work in Docker’s penguin/WSL distro for this project.
+Done (working)
+Docker
+
+Docker Desktop 29.7.2 (build a7dcaa6)
+Compose v5.5.0
+docker run --rm hello-world succeeded
+Data disk left on C: (user chose this). Folder D:\TESTCMLDDRIVE\PROGRAMMER\Docker\data may exist and be empty; ignore it.
+Ollama (clean reinstall on D:)
+First install put models on C: (C:\Users\Testcmluser.ollama\models) even with OLLAMA_MODELS set — Windows tray app started before the env var stuck.
+User asked for a clean setup, not a junction. We uninstalled and wiped leftovers, then reinstalled.
+Version: 0.33.3
+Program: D:\TESTCMLDDRIVE\PROGRAMMER\Ollama
+(ollama.exe, ollama app.exe, unins000.exe, lib, models)
+Models: D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+(blobs, manifests present)
+User env var: OLLAMA_MODELS=D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models
+API: http://127.0.0.1:11434 — GET /api/tags works
+Model: qwen2.5-coder:7b (id dae161e27b0e, 4.7 GB)
+Test: ollama run qwen2.5-coder:7b "Reply with the single word: pong" → pong
+After reinstall, C: .ollama\models was not populated (D: listing only). Good.
+Not done
+Hermes not installed
+LiteLLM / docker-compose router not used
+No LAN / other PCs
+No extra models
+Junction workaround not applied (not needed after clean reinstall)
+Decisions
+Ollama native Windows, not in Docker, not in WSL.
+Docker Desktop on Windows; WSL 2 is only Docker’s backend.
+Future Hermes: prefer Ubuntu WSL for the agent; keep Ollama on Windows; Hermes talks to http://127.0.0.1:11434/v1. User has not started this.
+Do not put Hermes in Docker (needs host FS/shell).
+Architecture later: Hermes delegate_task is in-process; LAN only carries inference. LiteLLM maps model name → host. Files were drafted earlier at artifacts/local-llm-lan/ in the previous project chat — that is planning only; user never ran it on the PC.
+
+please ask if something is inconsistent or unclear.
+help me setup it up one small step at a time
+
+
