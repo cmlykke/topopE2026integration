@@ -1,0 +1,17 @@
+Working with grok:
+
+see payment:   https://console.x.ai
+
+Weiqifan1     WeiqiBaduk1!
+get to d drive in powershell: cd D:\
+
+run it in folder:
+grok --version
+if fails:
+irm https://x.ai/cli/install.ps1 | iex
+then
+cd /path/to/your/folder
+grok
+
+switch model (4.6 is expensive):
+grok --effort low
