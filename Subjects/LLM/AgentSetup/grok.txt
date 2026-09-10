@@ -2,7 +2,6 @@ Working with grok:
 
 see payment:   https://console.x.ai
 
-Weiqifan1     WeiqiBaduk1!
 get to d drive in powershell: cd D:\
 
 run it in folder:
@@ -15,3 +14,6 @@ grok
 
 switch model (4.6 is expensive):
 grok --effort low
+
+
+

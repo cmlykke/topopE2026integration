@@ -1,0 +1,117 @@
+
+SIdste gang snakkede vi om databaser, hvor
+intet aendres eller bliver slettet. istedet
+laves nye version af den enkelte linje.
+
+Nu snakker vi om migrering til en saadan database.
+
+1 step: lav nye tabelle
+2: lav datamigrering og tilfoej det nye timestamp
+3: fjern det gamle schema
+
+Guid: det bruger vi for at hindre at den samme handling sker flere gange.
+
+---- for at teste om ens migrerings script virker, kan man bruge transactions,
+og derefter rollback. derved kan man se sine aendringer
+i terminalen uden at aendringer paavirker databasen.
+
+---- for at se historikken af de enkelte entiteter, kan man
+bruge en "view function"
+
+\\\\\-------------------------------------------------------------------------------------\\\\\\\
+
+migration tools: forskellige frameworks har forskellige migration tools.
+f.eks. flyway
+
+
+------ additive strategy:
+hvis du har en table "A" hvor ingen kolonner maa vaere null,
+saa kan man tilfoeje "maybe-null" data ved at lave en ny table "B"
+der har noget data og har table "A" som foreign key.
+
+--------- use case 5: multiple services interact with venuedata---
+
+////-------------------------------------------------------------------------------/////
+
+Distributed databases in scaled systems.
+
+replas er gode, fordi problmet med scaling er ofte er read, og replication er godt til det.
+(husk: naar man har replication, bliver 1 server udnaevt til primary, som staar for updates.
+hvis den er dene, bruger man "voting" til at bestemme hvilken server der skal vaere den nye primary.)
+
+
+sharding:
+
+
+man kan have shards, med replicas of each shard. men man kan ikke have replicas
+hvor hver replica har shards. Det giver ikke mening, for man har stadig datadublication.
+
+
+///--------------------------------------///
+
+live demo: mongodb sharding
+(Thomas har et projekt med sharding)
+han lavede live demo.
+
+
+-----DAtabase decomposition in microservice architecture:
+1. problem:
+aarsagen tilat microservices ikke maa dele database,
+de skal vaere decoupled.
+2. problem:......
+
+
+"Database decomposition":
+
+Husk -- ingen cross-database foreign keys, og ingen joins mellem databaserne.
+transaktions becomes destributed.
+
+naa man splitter en database op i mindre stykker,
+saa forsvinder "afhaengigheden" ikke,
+selvom man er noedt tilat fjerne foreign key.
+man haandtere afhaengigheden ved at den ene
+microservice notificere den anden om aendringen.
+Hovedreglen er at
+Hvis det giver mening, kan man godt lave lidt datadublikering.
+
+
+her er reglen for foreign key:
+````
+when you do database decomposition, and you have a table A and table B. they go in different microservices dtabases. B contains an id from A as a foreign key.
+which microservice should notify the other whn data changes
+````
+""""
+Service A (the owner of the referenced row) should publish the events. Service B should subscribe.
+After you split the tables, there is no real foreign-key constraint anymore — only a stored ID. Consistency becomes eventual and is done with domain events, not with a database constraint.
+Why A notifies B
+
+A owns the authoritative record. When that record is created, updated in a meaningful way, or deleted, A is the only place that knows it first.
+B only holds a copy of the ID (and often a small denormalized snapshot). B needs to react: mark its rows orphaned, cancel related work, update a local cache, etc.
+Classic examples: Customer service publishes CustomerDeleted / CustomerUpdated; Order service listens and handles the dangling customer_id. Product catalog publishes price/availability changes; anything that stored a product ID listens.
+
+This is the usual direction in the database-per-service + event-driven pattern.
+When B might notify A
+Only if A actually cares about the existence or state of B’s rows (for example A keeps a counter, an “has active children” flag, or must refuse deletion while children exist). That is a separate, explicit business rule, not something the old FK automatically gave you. Most simple “B points at A” cases do not need it.
+"""
+
+
+///////-----------------------------------------------------////
+Location independence:
+
+
+
+
+///////------------------------------------------------------------/////
+
+
+
+
+
+
+
+
+
+
+
+
+

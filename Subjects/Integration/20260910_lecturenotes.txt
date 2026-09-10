@@ -1,0 +1,222 @@
+
+preflight requests> et koncept fra security.
+
+health endpoint> somme tider virker vores API ikke.
+det er en god ide at lave et health get endpoint,
+der viser at vores api er i live.
+
+ideempotency exercise:
+
+use a idempotency key for at sikre os at noget ikke sker flere gange.
+
+man skal give med:
+key, request hash, idempotency_expires value.
+
+det et lidt kompliceret, og det er derfor folk bruger frameworks.
+Husk at lave oevelsen med cache.
+
+
+////----------------------------------------------////
+
+REST APIs: kl. 9.30 ---- REST er dages emne (billede med mand i laenestol)
+
+hvad er rest?
+Det er ikke en standard, det er en stilart.
+Man kan ogsaa sige: det er et "set of recommendations". nogen
+er maaske gode andre ikke, men hvis man bryder et af dem,
+er end API ikke rest.
+Et API kan sagtens vaere godt uden at være REST.
+
+en api kan ikke vaere REST hvis alle endpoints er POST. det er ikke REST !!!
+
+pagination:
+noget man skal bruge i REST er pagination.
+God ide at bruge det exempel Arturo har i sin slide.
+
+REST endpoint boer vaere i flertals for, eg. GET/bananas IKKE GET/banana
+
+verbuer:
+hvis mna inkludere et verbum URLen. det er IKKE REST.
+Det betyder man ikke maa bruge navnet "login" da det er et verbum.
+Man kan istedet bruge "auth" (authentication), da det er et navneord.
+
+fileextensions: man maa ikke bruge fileextensions i endpoint navnet,
+eg "GET/bananas.xml" er ikke lovligt.
+
+--anden regel> end endpoint maa ikke slutte med en slash.
+
+
+I Aturos slides, er der her en god side der forklare hvad man maa have med.
+
+EGEN BETRAGTNING, IKKE ARTURO: man skal bruge flertals form i rest endpoitns for ressourcer
+hvor man kan hente collections ud for dem.
+f.eks. brug CVs hvis der findes collections af CVer
+men hvis hvert cv kun har 1 name, boer man bruge ental,
+eg. CVs/name
+
+Oevelse:
+
+/////-------------------------------------------//////
+
+REST Endpoint Naming
+Work in pairs.
+
+Imagine that you have a database with CVs whose design is based on the following data entities:
+
+Personal information: first name, last name, date of birth, place of birth, nationality(ies), CPR, picture file name
+Contact information: street, number and further information, postal code, email address, phone number
+Optional contact information: LinkedIn account link
+Academic background: for each tertiary education degree, name, educational institution, year of graduation
+Languages: for each one, name, whether it is a mother tongue, level (high, intermediate, low)
+Level will only be applied if mother tongue is false
+Work history: for each position, name of the company, job title, starting date, end date
+Hobbies (optional)
+You have to design a REST API based on this data.
+
+Write down the names of the following REST endpoints:
+
+List CVs. Either the full list or filtered by:
+---------------------- full: GET/cvs
+Last name------------------- GET/cvs?last-name={lastname}
+Language-------------------- GET/cvs?last-name={lastname}&lanuage={language}
+Create a new CV------------- POST/cvs
+
+Get a full CV-------------------------------- GET/cvs/{1}
+
+Replace an entire CV--------------------------PUT/cvs/{1}
+
+Partially update a CV--------------------------PUT/cvs/{1}
+
+Delete a CV----------------------------------- DELETE/cvs/{1}
+
+Get personal information for a CV-------------- GET/cvs/{1}/personal-information
+
+Replace personal information for a CV---------- PUT/cvs/{1}/personal-information
+
+Partially update personal information for a CV--PUT/cvs/{1}/personal-information
+
+Retrieve the picture file name for a CV----------GET/cvs/{1}/picture-name
+                                         eller   GET/cvs/{1}/personal-information/picture-name
+
+Update the picture file name for a CV------------ PUT/cvs/{1}/picture-name
+
+Get all degrees for a CV------------------------ GET/cvs/{id}/degrees/{degree-id}
+
+Add a new degree to a CV------------------------ POST/cvs/{id}/degrees
+Get one degree for a CV------------------------- GET/cvs/{id}/degrees/{id}
+Replace a degree in a CV------------------------ PUT/cvs/{id}/degrees/{id}
+Delete a degree in a CV------------------------- DELETE/cvs/{id}/degrees/{id}
+
+Logging in-------------------------------------- POST/auth/sessions    MEGET VIGTIGT at vi ike bruger navnene login eller logout
+                                          eller  POST/auth/tokens
+                                          (det kommer an på om login er sessions eller token baseret)
+
+Logging out------------------------------------- POST/auth/id?={1}
+
+
+/////-------------------------------------------////
+
+efter oevelse i klassen:  kl. 10.51
+
+
+Uniform inteface:
+(maget faa bruge HATEOAS, men man skal bruge det)
+
+Statelessness:
+...
+
+
+HATEOAS:
+der findes contextual links, der foelger med
+naa man faar data fra APi,
+der findes ogsaa general links. det viser top-level
+endpoints.
+Jeg ved ikke om man kan skifte mellem dem, eller om
+man skal vaelge at bruge entern
+general eller contextual links for alle endpoints.
+
+hvis man bruger HATEOAS, ser det ud til at man boer bruge det overalt.
+man maa ikke have endpoints hvor man ikke bruger dem.
+
+.... HATEOAS relationshops:
+    vi skal implementere det "contextually" til eksamen.
+
+
+//******************************** oevele: kl. 11.27:
+
+Assess whether the following APIs used by the API Consumption sample are RESTful or not. Explain why.
+
+The OpenWeather Map "Current Weather Data" API
+---ikke rest, for de indikere ikke cacheability.(det skal de gøre for at være rest)
+derudover: bruger ikke resource navne (det skal man),
+eg: https://bulk.openweathermap.org/snapshot/{BULK_FILE_NAME}?appid={API key}
+{BULK_FILE_NAME} istedet for /bulkfilename?={BULK_FILE_NAME}  eller lignende.
+
+---- responses har ingen HATEOAS.
+deres api er heller ikke "selfdescriptive" (jeg er ikke sikker paa kravene til dette.)
+
+The MapBox "Static Images" API
+de bruger ikke ressource navne, eg.
+get https://api.mapbox.com/v4/{tileset_id}/{zoom}/{x}/{y}.{format}
+istedet for {tileset_id} burde de have skrevet /tileset?={tileset_id} eller noget i den retning.
+
+det er ikke godt at de bruge /data/ i deres URL. man maa ku have resourcenavne med.
+---har ingen hateoas.
+det de returnere er binary. de kunne have valgt f.eks. multipart responses istedet for
+kun binary.
+
+
+The TicketMaster Discovery API
+her er et eksempel fra ticketmaster
+Example: https://app.ticketmaster.com/discovery/v2/events.json?apikey={apikey}
+de bruger fileextensions i deres endpoints, saa det er ikke rest.
+
+/discovery/v2/suggest == skulle vaere i flertal eg. suggestions
+
+de har heller ikke HATEOAS. det skal man teknisk set have for at vaere restfull.
+
+
+spoergsmaal til slides:
+the URI must specify the resourece....and what format should be used,
+(men vi maa ikke bruge fileextensions i endpoints???)
+==== man skal goere det i headeren, og ikke i URL'en
+
+
+/////-----------------------------------------------------------////
+
+API versioning strategies:
+...... de alle ulempler. det er pest eller kolera.
+
+en ting man skal laere om REST er at
+skal man gøre det rigtigt, vil man ofte give for meget information med.
+Ofte er dett derfor bedre IKKE at have en restfull api,
+for hvis man ikke har alt med, kan man ikke kalde det restfull.
+
+
+//////--------------------------------------------//////
+
+homework:
+uge 3 opgave 3-- To do list REST API, og
+uge 3 opgave 4 -- ..add pagination.
+
+herudover skal jeg lave homework til sidste uge.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

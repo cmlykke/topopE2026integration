@@ -2,6 +2,122 @@
 
 
 
+Handoff: PC2 worker — Ollama folders + OLLAMA_MODELS
+Previous state (already done)
+
+Worker Windows hostname: DESKTOP-147RV2O
+Worker Tailscale IPv4: 100.85.50.77
+Same team tailnet as home PC, user cmantziuslykke@
+Tailscale 1.102.3, service Running
+
+This micro-task goal
+Create Ollama directories and set OLLAMA_MODELS before any Ollama install. Do not set OLLAMA_HOST. Confirm Tailscale still 100.85.50.77.
+What blocked the original paths
+New-Item to C:\PROGRAMMER\Ollama failed:
+Access to the path 'Ollama' is denied (normal user cannot always create under C:\).
+User then created C:\AIS. Later verify showed C:\PROGRAMMER also exists now (Test-Path True), but env was already pointed at AIS.
+What was run
+Folders:
+
+C:\AIS
+C:\AIS\Ollama
+C:\AIS\Ollama\models
+
+PowerShell[Environment]::SetEnvironmentVariable("OLLAMA_MODELS", "C:\AIS\Ollama\models", "User")
+New-window verify (actual output)
+text[Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+→ C:\AIS\Ollama\models
+
+[Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+→ (empty)
+
+[Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+→ (empty)
+
+Test-Path "C:\AIS\Ollama\models"
+→ True
+
+Test-Path "C:\PROGRAMMER"
+→ True
+
+tailscale ip -4
+→ 100.85.50.77
+OLLAMA_HOST Machine was empty → do not stop.
+Tailscale names after admin rename
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+RoleIPv4New Tailscale nameUserThis worker100.85.50.77chr-8gbram-laptopcmantziuslykke@Home PC100.96.116.71chr-32gbram-desktopcmantziuslykke@
+Windows hostname on worker is still DESKTOP-147RV2O. Other peers unchanged (atlas, prometheus, chrisschool, …).
+Full status at verify time:
+text100.85.50.77    chr-8gbram-laptop             cmantziuslykke@  windows  -
+100.120.28.32   atlas                         madsfjeldberg@   windows  -
+100.96.116.71   chr-32gbram-desktop           cmantziuslykke@  windows  -
+100.115.3.66    chrisschool                   chye0001@        windows  offline
+100.84.237.31   fedora                        Scrabble30@      linux    offline
+100.101.98.59   kevpc2                        kevinschou99@    windows  offline
+100.91.138.35   kevsfedepc                    kevinschou99@    windows  offline
+100.82.27.73    macbook-air-tilhrende-sander  sanderc69@       macOS    -
+100.94.221.40   macpro                        madsfjeldberg@   macOS    offline
+100.89.158.121  prometheus                    madsfjeldberg@   windows  -
+Paths to use from here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+VariableValuePROGRAMMER_ROOT (actual)C:\AISOllama dirC:\AIS\OllamaOLLAMA_MODELS (User)C:\AIS\Ollama\modelsC:\PROGRAMMERexists, not used for OLLAMA_MODELSOLLAMA_HOST UserunsetOLLAMA_HOST Machineunset
+Ollama is not installed yet. Next install must see OLLAMA_MODELS=C:\AIS\Ollama\models (new process after the User env set). Do not set OLLAMA_HOST unless a later task says so.
+Suggested next decision
+Install Ollama on the worker only, after a fresh logon or new process so it inherits OLLAMA_MODELS. Keep weights on C:\AIS\Ollama\models. If you insist on C:\PROGRAMMER\Ollama\models, move/copy data and reset the User env var before first ollama pull.
 
 
 

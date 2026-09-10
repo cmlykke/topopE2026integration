@@ -1,17 +1,46 @@
+NEXT STEP (PC2 — worker only)
+=============================
+Folders/env DONE. Use this from now on:
+  PROGRAMMER_ROOT = C:\AIS
+  OLLAMA_MODELS   = C:\AIS\Ollama\models
+  Tailscale name  = chr-8gbram-laptop
+  Tailscale IP    = 100.85.50.77
+  Home PC name    = chr-32gbram-desktop (100.96.116.71)
 
+Do NOT use C:\PROGRAMMER for Ollama.
 
+Goal: install Ollama INTO C:\AIS\Ollama, then prove localhost API.
 
+WINDOW 1 — install (new PowerShell):
 
+  $env:OLLAMA_INSTALL_DIR = "C:\AIS\Ollama"
+  irm https://ollama.com/install.ps1 | iex
 
+When it finishes: CLOSE that window.
 
+WINDOW 2 — start the server (leave this window OPEN):
 
+  $env:OLLAMA_HOST
+  & "C:\AIS\Ollama\ollama.exe" serve
 
+Expect listening on 127.0.0.1 or similar. Do NOT set OLLAMA_HOST.
 
+WINDOW 3 — verify (second PowerShell):
 
+  ollama --version
+  $env:OLLAMA_HOST
+  [Environment]::GetEnvironmentVariable("OLLAMA_MODELS", "User")
+  curl.exe --noproxy "*" -s --max-time 10 http://127.0.0.1:11434/api/tags
 
+DONE looks like:
+- ollama --version prints (e.g. 0.33.x)
+- OLLAMA_HOST is empty in window 3
+- OLLAMA_MODELS still C:\AIS\Ollama\models
+- curl returns JSON (models list can be empty)
+- no timeout / no 100.x in the error
 
+Do NOT pull a model yet.
 
-
-
-
-
+Paste window 2 last lines (listening…) + ALL window 3 output into whatihavedone.txt.
+If the installer asks to start Ollama automatically, that is OK; still run serve if curl fails.
+If curl fails, tray: Quit Ollama, then retry window 2+3.

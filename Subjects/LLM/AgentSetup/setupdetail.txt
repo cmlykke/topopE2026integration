@@ -42,7 +42,7 @@ Progress pointer (update when advancing):
   Phase B: COMPLETE
     - Hermes base_url http://127.0.0.1:4000/v1, api_key set
     - hermes chat -q … -m coder → pong
-  Active micro-task: PC2 Tailscale join + note 100.x (see currentToDO.txt)
+  Active micro-task: PC2 install Ollama into C:\AIS\Ollama (local :11434)
   Home PC orchestrator stays as-is; NODE_* still all 100.96.116.71 until
   PC2/PC3 Ollama is reachable, then split .env IPs.
   REHEARSAL: litellm-config still on 7b; restore README models later
@@ -296,5 +296,7 @@ Tailscale mimic: prefer separate logins on SAME team tailnet (optional);
 Smoke tip: use curl --data-binary @file.json on Windows PowerShell
 Fleet so far:
   PC1 home desktop-gp6fdne = 100.96.116.71 (orchestrator + worker)
-  PC2 = (pending)
+  PC2 = DESKTOP-147RV2O / Tailscale chr-8gbram-laptop / 100.85.50.77
+        PROGRAMMER_ROOT=C:\AIS  OLLAMA_MODELS=C:\AIS\Ollama\models
+        Home Tailscale name now chr-32gbram-desktop (100.96.116.71)
   PC3 = (pending)
