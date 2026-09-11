@@ -1,9 +1,0 @@
-Simple Linear Regression via Gradient Descent
-================================================
-Feature (x): BMI   Target (y): disease progression
-Learning rate: 0.01   Iterations: 500
-
-Fitted model:  f(x) = 998.5367 * x + 152.0034
-
-Training set  -> MSE: 3854.113   R^2: 0.3657
-Validation set -> MSE: 4061.781   R^2: 0.2334
