@@ -1,0 +1,24 @@
+
+
+-------- 2026-09-11 fredag, LLM undervisning.
+
+---- business case: vores underviser fandt paa efter folk vargaaet:
+bluetooth app, der forbinder med andre telefoner i rummet med samme app,
+og videregiver lyd til dem,
+saa man via bluetooth bedre kan hoere.
+-- derved kan man undgaa servere, det er ren peer-to-peer.
+
+---- Ohh-my-pie see paa den som harness
+det skulle vaere det bedste herness i oejeblikket.
+
+--- vertus   verdensmodel
+--- dette skulle vaere en meget interessant model der er fokuseret paa at forstaa
+hele verden.
+
+
+//////---------------------------------------------------------------------------------///////////
+
+
+
+
+

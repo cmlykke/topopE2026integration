@@ -1,0 +1,247 @@
+
+
+AI prompt
+
+i need to findscholarly articles about semantic drift in the context of training and inference (prompting) of LLMs. The articles need to be free, and they must be accademically reputable and relevant.
+
+
+//////-----------------------------------------------//////
+Min reflextion. hvilke papers jeg vil bruge:
+
+Denne er god til generel definition: ----- "what is it"
+
+1. Know When To Stop: A Study of Semantic Drift in Text Generation
+Spataru, Hambro, Voita, Cancedda — NAACL 2024 (Meta FAIR)
+arXiv PDF · ACL Anthology
+
+--------------------------------- "how does it differ from ambiguity or hallusination"
+
+specifik for prompts:
+
+2. When Meaning Stays the Same, but Models Drift: Evaluating Quality of Service under Token-Level Behavioral Instability in LLMs
+Li, Kreuzwieser, Peters — arXiv 2025 (ICML Tokshop track)
+arXiv
+
+3. Natural Context Drift Undermines the Natural Language Understanding of Large Language Models
+arXiv:2509.01093
+HTML
+
+
+---------------------------------- "discussion"
+
+
+
+
+/////-------------------------------------------////
+
+Keep — low overlap with hallucination and ambiguity
+These treat drift as distribution / representation / prompt-surface change, not as “the model is wrong about the world” and not as “the prompt has several readings.”
+
+
+PaperWhy it stays distinct
+
+
+When Meaning Stays the Same, but Models Drift (PBSS)
+
+Meaning is held fixed; only tokens change. That is the opposite of an ambiguity study. Behavior shift ≠ fabricating facts.
+
+Natural Context Drift Undermines NLU
+
+Answer is still in the passage. Failure is mismatch with pretraining surface form, not underspecification and not invention of facts.
+
+Semantic Anchors in In-Context Learning
+
+Can ICL override pretrained label semantics? About rigidity of meaning under few-shot flips, not vague prompts or made-up content.
+
+Feature Drift: How Fine-Tuning Repurposes Representations
+
+SAE / internal features change activation under SFT. Training mechanics, not output truth or prompt underspec.
+
+Value Drifts: Tracing Value Alignment During Post-Training
+
+Stance/value shift through SFT vs DPO. Alignment dynamics, not factual errors or ambiguous wording.
+
+Measuring and Controlling Persona Drift
+
+Specified persona decays over turns (attention decay). Consistency of a constraint, not truthfulness or ambiguity.
+
+Sem-DPOP
+
+reference-tuned prompt generators wander from the user’s intended wording. Optimization fidelity; only light contact with “meaning change.”
+
+
+//////---------------------------------------------///////
+
+AI RESPONS:
+
+Here is a curated set of free, reputable papers that treat semantic drift (or a closely related drift of meaning/representations) in LLM training and inference/prompting. All are on arXiv and/or ACL Anthology.
+
+Core inference / generation papers
+1. Know When To Stop: A Study of Semantic Drift in Text Generation
+
+Spataru, Hambro, Voita, Cancedda — NAACL 2024 (Meta FAIR)
+
+arXiv PDF · ACL Anthology
+Defines semantic drift as generated text leaving the prompt’s subject, with falling relevance/truthfulness. Shows LLaMA-2 style models emit correct facts first, then incorrect ones. Introduces a semantic drift score on FActScore biographies and studies early stopping / reranking. Best single starting paper for generation-time drift.
+
+
+
+2. When Meaning Stays the Same, but Models Drift: Evaluating Quality of Service under Token-Level Behavioral Instability in LLMs
+
+Li, Kreuzwieser, Peters — arXiv 2025 (ICML Tokshop track)
+
+arXiv
+Prompting-focused. Same semantic intent, different tokenizations/wordings → systematic response shifts (prompt variance). Introduces Prompt-Based Semantic Shift (PBSS). Directly about inference instability under meaning-preserving rephrasing.
+
+
+
+
+3. Natural Context Drift Undermines the Natural Language Understanding of Large Language Models
+
+arXiv:2509.01093
+
+HTML
+Inference-time QA: human-edited passages that still contain the answer but have drifted away from pretraining text. Accuracy collapses as similarity to training versions falls (e.g. large drops on BoolQ). Bridges training distribution vs. inference context.
+
+
+
+
+4. Semantic Anchors in In-Context Learning: Why Small LLMs Cannot Flip Their Labels
+
+Kumar — arXiv:2511.21038
+
+arXiv
+Few-shot prompting cannot override pretraining label semantics (1–12B models). ICL refines a semantic backbone; inverted demos do not produce coherent anti-semantic classifiers. Strong paper on what prompting can and cannot change.
+
+
+
+
+5. Measuring and Controlling Persona Drift in Language Model Dialogs
+
+arXiv:2402.10962
+
+HTML
+Multi-turn inference: persona specified in the prompt decays within ~8 self-chat turns. Links drift to attention decay; proposes split-softmax. Useful if your “prompting” setting is long dialogues.
+
+Training / post-training / representations
+
+
+
+
+
+6. Feature Drift: How Fine-Tuning Repurposes Representations in LLMs
+
+Galichin et al. — EACL 2026 Findings
+
+ACL Anthology
+SAE analysis: instruction tuning mostly reuses base features with changed activation distributions (“feature drift”), rather than inventing new concepts. Case study on refusal. Training-time counterpart of semantic/representational drift.
+
+
+
+
+
+7. Value Drifts: Tracing Value Alignment During LLM Post-Training
+
+arXiv:2510.26707
+
+HTML
+Tracks how expressed values shift through SFT vs preference optimization on Llama-3 / Qwen-3. SFT usually locks values; later DPO-style stages rarely realign them. Training-time value drift, not lexical drift.
+
+
+
+
+
+8. Sem-DPO: Mitigating Semantic Inconsistency in Preference Optimization for Prompt Engineering
+
+arXiv:2507.20133
+
+HTML
+Preference-tuned prompt generators can win reward while drifting from the user’s meaning. Formal bound on semantic drift; semantic-consistency weights in DPO. Training of prompt policies, not the base LLM itself.
+
+Related but still on-topic (multimodal / decoding / older NLP)
+
+
+
+
+
+9. Curing Semantic Drift: A Dynamic Approach to Grounding Generation in Large Vision-Language Models
+
+Chen et al. — arXiv:2506.21509
+
+HTML
+Decoding-time drift: linguistic priors detach from the image. Training-free Dynamic Logits Calibration. Same “drift during generation” idea as (1), for LVLMs.
+
+
+
+
+
+10. The Telephone Game: Evaluating Semantic Drift in Unified Models
+
+Mollah et al. — arXiv:2509.04438
+
+arXiv
+Iterated T2I ↔ I2T like the telephone game; measures compounding loss of entities/attributes. Protocol + metrics (MCD, MGG). Inference composition, not standard text-only prompting.
+
+
+
+
+11. Addressing Semantic Drift in Question Generation for Semi-Supervised QA
+
+Zhang & Bansal — 2019
+
+PDF
+Classic seq2seq QG paper: generated questions drift from context/answer. Semantics-enhanced RL rewards. Useful as the pre-LLM lineage of the term.
+
+
+
+
+/////----------------------------------------------//////
+AI REFLECTION ON THE PAPERS
+
+How the term is used (so you can filter)
+
+
+
+SenseTypical settingPapers aboveOutput leaves the prompt / facts go bad over lengthGeneration / decoding1, 5, 9Same meaning, different wording → different behaviorPrompting2, 4Test text drifted from pretraining textInference vs training data3Features / values / prompts change in SFT–DPOTraining6, 7, 8Iterated multimodal loop loses contentUnified models10Generated question leaves the passageOlder QG11
+
+Practical reading order
+
+Spataru et al. (NAACL 2024) — definition + measurement for generation.
+Li et al. (PBSS) + Semantic Anchors (ICL) — prompting.
+Natural Context Drift + Feature Drift — train–test and fine-tuning.
+Value Drifts / Sem-DPO if you care about alignment and prompt optimization.
+
+All listed PDFs are open (arXiv or ACL). Venues: NAACL, EACL Findings, plus recent arXiv that is already standard in the LLM literature. If you want a narrower slice (e.g. only ICL, or only SFT/DPO), say so and I can prune or add a few more in that lane.
+
+
+
+////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+
+
+overview paper / introduction:
+
+Characterizing and Measuring Linguistic Dataset Drift
+Chang, Lee, Connor, Misra, Toutanova — ACL 2023
+ACL Anthology
+
+It treats drift as a property of data and models, not as “the model starts lying.”
+It splits drift into vocabulary / structural / semantic dimensions. That is a taxonomy you can keep using.
+Semantic drift there means meaning change not reducible to word-frequency change — close to your project, far from hallucination and far from ambiguity.
+It is about predicting performance under shift, which lets you say: LLMs inherit this problem at training and at inference.
+
+
+Use it to open: NLP already distinguishes kinds of linguistic drift; LLMs make those kinds show up in prompting, pretraining match, ICL, and fine-tuning. Then PBSS, Natural Context Drift, Semantic Anchors, Feature Drift, and Value/Persona Drift become instances, not competitors with this paper.
+
+(ICL and SAE are two entirely different concepts that relate to diagnosing, tracking, and understanding why and how this semantic drift occurs:)
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+
+
+
+Synthesize evidence from literature, in the context of training and inference (prompting) of LLMs.
+                                   ^ (ambiguity, semantic drift, hallucination and prompt injection)
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+
+Explain the concepts of ambiguity, semantic drift, hallucination and prompt injection.
+
+
+
+
+
+
+
+
+
+
+

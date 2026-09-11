@@ -28,6 +28,21 @@ formaalet med gradient descent er at minimere z aka. L aka. vores loss function.
 ----- se billede fra slide "gradient descent 4"
 
 
+hvordan man haandtere outliers:
+
+3 maader:
+clustering.
+man kan bruge vaegter (reducere betydningen af ekstremer)
+.... 1 til jeg ikke kan huske.
+
+
+//-----------------------------------/////
+
+4ts - Trait, Task, Tone, Target
+
+///////----------------------------------------/////
+
+Prompt injection 1:
 
 
 

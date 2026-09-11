@@ -1,0 +1,52 @@
+
+
+overview paper / introduction:
+
+
+Characterizing and Measuring Linguistic Dataset Drift
+Chang, Lee, Connor, Misra, Toutanova — ACL 2023
+ACL Anthology
+
+
+Larger Language Models Do In-Context Learning Differently
+Wei, Wei, et al., 2023
+arXiv:2303.03846
+
+///-------------------------------------------////
+
+subtopics:
+
+PBSS  (same intent, different wording/tokens → different behavior)
+
+When Meaning Stays the Same, but Models Drift: Evaluating Quality of Service under Token-Level Behavioral Instability in LLMs
+Li, Kreuzwieser, Peters — arXiv 2025 (ICML Tokshop track)
+arXiv
+
+///--------------------------------
+
+Anchors  (pretrained label/meaning vs what ICL or the prompt tries to impose)
+
+Semantic Anchors in In-Context Learning: Why Small LLMs Cannot Flip Their Labels
+Kumar — arXiv:2511.21038
+arXiv
+
+///////////----------------------------
+
+Feature Drift (fine-tuning reuses / reweights representations rather than inventing new ones)
+
+Galichin et al., Feature Drift (EACL 2026 Findings)
+
+Value / Persona  (expressed values move in post-training; specified persona decays in dialogue)
+
+Value Drifts: Tracing Value Alignment During LLM Post-TrainingCore (values)
+
+Measuring and Controlling Persona Drift in LM DialogsCore (persona)
+
+
+
+
+
+
+
+
+
