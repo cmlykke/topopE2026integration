@@ -1,0 +1,18 @@
+
+
+spoergs ander koerenede ollama Aier hvad deres model er:
+
+  $ips = @{
+    kevpc2 = '100.101.98.59'
+    sander = '100.82.27.73'
+    macpro = '100.94.221.40'
+  }
+  foreach ($name in $ips.Keys) {
+    Write-Output "======== $name $($ips[$name]) ========"
+    curl.exe --noproxy "*" -s --max-time 15 "http://$($ips[$name]):11434/api/tags"
+    Write-Output ""
+    Write-Output "exit=$LASTEXITCODE"
+  }
+
+
+

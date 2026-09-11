@@ -3,9 +3,29 @@
 20260911 lecturenotes. LLM
 
 
+recap fra uge 1:
+
+Machinelearning: input -- gennem funktion --- giver output.
+a machinelearning model is a function.
 
 
+vi har en MEGET stor maengde token, og hvis de er
+vinkel rette -- har intet med hinanden at goere,
+i "po samme linje" == korreleret == har meget med hinanden at goere.
 
+//---------------------------------------------
+
+
+gradient descent:
+
+L(a,b) = a er haeldningen, b er hvor den skaere y aksen  (aka. intercept).
+
+man kan sige at gradient descent er "i hvilken retning gaar det mest ned af"
+(egen betragtning: taenk paa en 3 dimensionel koordinatsystem, hvor "bunden" er a (haeldningen)
+og b er intercept (skaeringen paa y aksen), saa er z vores loss function.
+naa z er stor, er vores model upraecis. naar z er lille, er vores model mere praecis.
+formaalet med gradient descent er at minimere z aka. L aka. vores loss function.)
+----- se billede fra slide "gradient descent 4"
 
 
 
