@@ -1,0 +1,214 @@
+FRESH WINDOWS MACHINE — WEAK PC AS ORCHESTRATOR (AI handoff)
+Generated for assistants with NO prior session memory.
+Human companion: chrsetup/fresh_setup_human.txt
+Attempt history (read if debugging / continuing THIS clone): chrsetup/setupdetail.txt
+
+------------------------------------------------------------------------
+0. HOW TO USE THIS FILE
+------------------------------------------------------------------------
+You are setting up a LOW-RAM Windows PC (typical: 8 GB, CPU-only) so it
+can ORCHESTRATE a Tailscale fleet. Inference runs on peer Ollama nodes.
+
+Read this file fully before acting. Prefer small steps:
+  - If chrsetup/currentToDO.txt and whatihavedone.txt exist, use that
+    micro-task pattern (one task → human reports → next task).
+  - If not, follow fresh_setup_human.txt phases and verify after each.
+
+Do NOT dump this entire file on the user.
+
+Do NOT reconstruct the old LiteLLM/Docker “full stack” from README
+unless the human explicitly revives it. Current path = script + peers.
+
+------------------------------------------------------------------------
+1. END GOAL
+------------------------------------------------------------------------
+Any weak PC can DRIVE:
+
+  Tailscale     — this PC and all workers on the SAME team tailnet
+  Controller    — a script (and optionally Hermes/OpenCode) ON THIS PC
+  Inference     — HTTP to peer Ollama  http://<peer-100.x>:11434
+  Optional hat  — local Ollama 7B at SHORT context (4096) so others
+                  can call THIS PC as a worker too
+
+There is no LiteLLM, no Docker Compose, no :4000, no NODE_* .env.
+
+“Slave” = that box’s Ollama answers HTTP. The controller on this PC
+does not start Hermes on peers.
+
+docs/orchestration-design.md is still right that CONTROL FLOW is a
+script, not an agent. Ignore its LiteLLM / Hermes-as-only-worker
+wiring where it conflicts with this file.
+
+------------------------------------------------------------------------
+2. HARD RULES
+------------------------------------------------------------------------
+R1. NEVER set User or Machine OLLAMA_HOST permanently to a Tailscale
+    100.x address. That made ollama list / local Hermes dial 100.x and
+    time out while nothing listened on localhost. Clear both scopes.
+R2. NEVER set Hermes model.base_url to THIS PC’s own 100.x.
+    ALLOW Hermes base_url = a PEER’s http://100.x:11434/v1 when the
+    model runs on that peer (weak-PC orchestrator pattern).
+    ALLOW http://127.0.0.1:11434/v1 for local chat-only / worker.
+    NEVER http://127.0.0.1:4000/v1 (LiteLLM retired).
+R3. Tailscale 100.x belongs in: fleet map, peer curls, the routing
+    script, optional Hermes peer base_url. Not in User OLLAMA_HOST.
+R4. Expose local Ollama to peers session-only:
+      $env:OLLAMA_HOST = "0.0.0.0:11434"
+    then ollama serve. Prefer 0.0.0.0 over permanent 100.x.
+R5. Do NOT put Ollama or Hermes in Docker. Do NOT install Docker or
+    LiteLLM for this workflow.
+R6. Do NOT demand 64K Ollama context on an 8 GB machine. Hermes 0.21.x
+    requires real ollama_num_ctx >= 64000 FOR TOOLS; that RAM is spent
+    on the machine that SERVES the model. Put 64K on a strong peer, or
+    skip Hermes tools.
+R7. OLLAMA_MODELS on a data drive is nice if you have one. On C:-only
+    laptops it is OK to keep models in %USERPROFILE%\.ollama\models.
+    If you SET OLLAMA_MODELS to an empty folder, ollama list can go
+    blank — clear the env rather than moving 4 GB blindly.
+R8. qwen2.5-coder:7b rejects “thinking” → HTTP 400. Interactive:
+      /reasoning none --global
+R9. Quit Ollama via tray. New PowerShell after User env changes.
+R10. Hermes install: Blank Slate (option 3), NOT Nous Portal.
+R11. Do not hermes update while rehearsing.
+R12. Ollama has no auth — firewall :11434 to Tailscale/trusted only.
+R13. Windows curl: curl.exe --noproxy "*" and --data-binary @file.json
+    (PowerShell -d $body often Invalid JSON).
+R14. OpenCode / OpenClaw / other fat agents have the same 64K-class
+    tax if the model is LOCAL. Point them at a peer or do not use them
+    as the reason to abandon the script.
+R15. One currentToDO at a time. Read whatihavedone before the next.
+
+------------------------------------------------------------------------
+3. TWO HATS (same PC can wear both)
+------------------------------------------------------------------------
+WORKER (optional, still useful):
+  Tailscale + Ollama + 7b + session 0.0.0.0:11434
+  Context stays small (~4096). Peers curl this 100.x:11434.
+
+ORCHESTRATOR (the point of this guide):
+  Tailscale + proof that THIS PC can POST chat to a peer and get pong
+  + routing script (or Hermes/OpenCode with peer base_url)
+  No Docker. No local 64K.
+
+Success for orchestrator is NOT “Hermes tools on local 7B”.
+Success IS “a command on this PC produces model output from a peer
+(and later writes repo artifacts).”
+
+------------------------------------------------------------------------
+4. REFERENCE MACHINES (do not reinstall blindly)
+------------------------------------------------------------------------
+Home 32 GB (historical LiteLLM orchestrator — superseded for NEW weak PCs):
+  desktop-gp6fdne / chr-32gbram-desktop  100.96.116.71
+  Ollama 0.33.3, Hermes 0.21.0, Docker/LiteLLM DID work there.
+  Do not copy Docker/LiteLLM onto 8 GB laptops.
+
+Weak laptop (this pattern proven 2026-09-10/11):
+  DESKTOP-147RV2O / chr-8gbram-laptop  100.85.50.77  ~8 GB RAM CPU
+  Ollama 0.33.3, qwen2.5-coder:7b in C:\Users\Bruger\.ollama\models
+  Worker bind 0.0.0.0 OK; local Hermes chat-only pong ~62s; tools FAIL
+  at 64K (hang) and at 4096 (Hermes rejects tool use).
+  Peers with live Ollama from that laptop:
+    kevpc2 100.101.98.59  qwen2.5-coder:7b, llama3.1:latest
+    macbook-air-tilhrende-sander 100.82.27.73  qwen3:8b, qwen2.5:7b
+    macpro 100.94.221.40  qwen3.5:0.8b, ornith-1.5:9b
+
+------------------------------------------------------------------------
+5. PROCEDURE
+------------------------------------------------------------------------
+
+### 5.1 Tailscale
+Windows amd64 MSI from https://pkgs.tailscale.com/stable/#windows
+Same team tailnet. Verify: tailscale status ; tailscale ip -4
+Do not create a private second tailnet.
+
+### 5.2 Optional local worker (expose THIS PC’s model on Tailscale)
+Clear User+Machine OLLAMA_HOST.
+Install Ollama (default path OK). Pull qwen2.5-coder:7b. Local pong.
+Tray Ollama binds 127.0.0.1 only — collaborators cannot use that.
+Quit tray Ollama, then:
+  chrsetup/start-ollama-worker.ps1
+  (session OLLAMA_HOST=0.0.0.0:11434; ollama serve; leave window open)
+Firewall: TCP 11434 on Tailscale only (no Ollama auth).
+Verify:
+  .\verify-ollama-local.ps1
+  .\verify-ollama-local.ps1 -Chat
+  .\verify-ollama-tailscale.ps1
+Pass: last script PASS; netstat shows 0.0.0.0:11434 not only 127.0.0.1.
+Give comrades this PC’s tailscale ip -4 + model tag.
+They: curl http://<this-100.x>:11434/api/tags
+      .\verify-peer-ollama.ps1 -PeerIp <this-100.x> -Chat
+Keep context small (~4096). Do not set permanent OLLAMA_HOST=100.x.
+
+### 5.3 Orchestrator smoke (required)
+Pick a live peer. Prefer:
+  .\verify-peer-ollama.ps1 -PeerIp 100.101.98.59
+  .\verify-peer-ollama.ps1 -PeerIp 100.101.98.59 -Chat -Model qwen2.5-coder:7b
+Or curl:
+  curl.exe --noproxy "*" -s --max-time 15 http://100.101.98.59:11434/api/tags
+Then POST /api/chat with model tag from that JSON, stream false,
+prompt “Reply with the single word: pong”, --data-binary @file.json
+Pass: pong in the response. THIS is the orchestrator bar.
+
+If peer is offline, try the next 200 from tailscale status; do not
+block the whole setup on the home desktop.
+
+### 5.4 Fleet map
+hostname → Tailscale 100.x → ollama tags. Keep in chrsetup or a
+shared file. Script reads this; do not hardcode only in chat memory.
+
+### 5.5 Routing script
+Not LiteLLM. Smallest slice first: one function, one peer, write one
+file. Expand to docs/workflow-script-design.md phases later.
+PowerShell is native on these PCs; bash only if Git Bash is present
+and the human wants it.
+
+### 5.6 Optional Hermes (peer brain)
+Blank Slate, custom, http://<PEER-100.x>:11434/v1
+Model = peer tag. /reasoning none --global for 7b.
+Peer must expose 0.0.0.0; for tools peer needs real num_ctx >= 64000.
+Local 127.0.0.1:11434 only for chat, tools off, ollama_num_ctx 4096.
+Do not set local ollama_num_ctx 65536 on 8 GB.
+
+### 5.7 Do not
+Install Docker/LiteLLM; OpenCode as a substitute for the script
+unless the human asks for a coding TUI AND it uses a peer baseURL;
+move models to an empty OLLAMA_MODELS path; hermes update.
+
+------------------------------------------------------------------------
+6. AFTER REBOOT
+------------------------------------------------------------------------
+Tailscale up. OLLAMA_HOST User/Machine empty.
+If worker: quit tray Ollama; start-ollama-worker.ps1;
+verify-ollama-local.ps1; verify-ollama-tailscale.ps1.
+Orchestrate via script or Hermes→peer. verify-peer-ollama.ps1.
+
+------------------------------------------------------------------------
+7. CHRSETUP FILE ROLES
+------------------------------------------------------------------------
+setupdetail.txt      Archive of attempts + mistakes. AIs read for history.
+                     Do not treat old LiteLLM phases as current procedure.
+fresh_setup_ai.txt   THIS file — how to set up a weak orchestrator.
+fresh_setup_human.txt Human steps + verify for the same.
+currentToDO.txt      ONE human micro-task
+whatihavedone.txt    Evidence; read before next task
+start-ollama-worker.ps1  Session 0.0.0.0 serve helper (this clone)
+verify-ollama-local.ps1  127.0.0.1 tags (+ optional -Chat pong)
+verify-ollama-tailscale.ps1  THIS PC 100.x:11434 (what comrades need)
+verify-peer-ollama.ps1   Drive a friend’s 100.x (-Chat for pong)
+
+------------------------------------------------------------------------
+8. SUCCESS CHECKLIST
+------------------------------------------------------------------------
+Worker hat (optional):
+  [ ] Unique Tailscale 100.x
+  [ ] Local 7b pong
+  [ ] Session 0.0.0.0; verify-ollama-local.ps1 and verify-ollama-tailscale.ps1 PASS
+  [ ] User/Machine OLLAMA_HOST not 100.x
+
+Orchestrator hat (required):
+  [ ] curl peer :11434/api/tags from THIS PC
+  [ ] POST chat to peer returns pong
+  [ ] Fleet map written (name, IP, tags)
+  [ ] Routing script exists OR Hermes/OpenCode uses PEER base_url
+  [ ] No Docker/LiteLLM required
+  [ ] No 64K local Ollama on this 8 GB box

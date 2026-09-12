@@ -1,0 +1,235 @@
+Fresh setup — WEAK PC as orchestrator (human guide)
+====================================================
+
+Use this on a laptop or other low-RAM Windows PC (about 8 GB).
+Companion for AIs: chrsetup/fresh_setup_ai.txt
+History of past attempts (AIs only): chrsetup/setupdetail.txt
+
+The idea
+--------
+This PC RUNS THE WORKFLOW. It does NOT have to run the big model.
+
+  Orchestrate here  = Tailscale + a small script (and optional agent UI)
+  Infer elsewhere   = friends’ Ollama on the same Tailscale network
+                      (http://100.x.y.z:11434)
+
+You may still run a SMALL local Ollama (7B, short context) so others
+can call YOU. That is a worker hat, not the orchestrator brain.
+
+Do NOT install Docker or LiteLLM for this. Do NOT try to make Hermes
+use a 64 000-token window on this PC’s own Ollama — that froze an 8 GB
+laptop.
+
+Before you start
+----------------
+1. You need an account on the SAME team Tailscale network as the
+   machines that already run Ollama.
+
+2. Optional: a folder for big files (PROGRAMMER_ROOT). If you only have
+   C:, it is OK to leave Ollama models in C:\Users\<you>\.ollama\models.
+
+3. Always open a NEW PowerShell after installers or after changing
+   User environment variables.
+
+4. Do-nots:
+   - Do NOT set OLLAMA_HOST permanently to a Tailscale address (100.x)
+   - Do NOT point Hermes at THIS PC’s own 100.x address
+     (that was the timeout bug: nothing listening on localhost)
+   - You MAY point Hermes at a FRIEND’S 100.x:11434/v1 (their Ollama)
+   - Do NOT put Ollama or Hermes inside Docker
+   - Do NOT create a second Tailscale network
+   - Do NOT set a 64K Ollama context on an 8 GB machine
+
+
+================================================================
+PART A — Tailscale (required)
+================================================================
+
+1. Open: https://pkgs.tailscale.com/stable/#windows
+2. Download the amd64 .msi (Intel/AMD). ARM MSI only on ARM PCs.
+3. Install, log in to the TEAM tailnet.
+
+Verify:
+  tailscale status
+  tailscale ip -4
+
+Pass if you are logged in and have a 100.x IP.
+Write it down: This PC Tailscale IP = _______________
+
+
+================================================================
+PART B — Optional local worker (so others can call you)
+================================================================
+
+Skip this if this PC will ONLY drive and never serve a model.
+
+B1. Confirm OLLAMA_HOST is not set (User and Machine empty):
+
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+
+If Machine is set, Admin PowerShell:
+  [Environment]::SetEnvironmentVariable("OLLAMA_HOST", $null, "Machine")
+
+B2. Install Ollama (default location is fine on a C:-only laptop):
+  irm https://ollama.com/install.ps1 | iex
+  New PowerShell: ollama --version
+
+B3. Pull a small model (keep 7B for peers calling you at short context):
+  ollama pull qwen2.5-coder:7b
+  ollama run qwen2.5-coder:7b "Reply with the single word: pong"
+
+Pass if reply is pong. CPU may take a minute.
+
+B4. Open Ollama to Tailscale WHILE YOU WORK (not permanent):
+
+  Tray: Quit Ollama. Then either:
+
+    cd chrsetup
+    .\start-ollama-worker.ps1
+
+  or the two lines:
+
+    $env:OLLAMA_HOST = "0.0.0.0:11434"
+    ollama serve
+
+  Leave that window open. Do not store OLLAMA_HOST in User/Machine env.
+
+  Why: tray Ollama listens on 127.0.0.1 only. Collaborators on Tailscale
+  need 0.0.0.0:11434 so http://YOUR.100.x:11434 answers.
+
+  Windows Firewall: allow TCP 11434 on the Tailscale interface only
+  (Ollama has no auth). If Tailscale curl fails but localhost works,
+  this is usually the firewall.
+
+B5. Verify from THIS PC (scripts in chrsetup):
+
+  .\verify-ollama-local.ps1
+  .\verify-ollama-local.ps1 -Chat
+  .\verify-ollama-tailscale.ps1
+
+  Pass if the last script prints PASS and your 100.x :11434/api/tags JSON.
+
+  Give collaborators:
+    your Tailscale IP (tailscale ip -4)
+    model tag (usually qwen2.5-coder:7b)
+    they curl http://YOUR.100.x:11434/api/tags
+    they POST /api/chat like PART C (or run verify-peer-ollama.ps1 -PeerIp YOUR.100.x -Chat)
+
+After reboot: quit tray Ollama, run start-ollama-worker.ps1 again, then
+the three verify scripts.
+
+
+================================================================
+PART C — Prove this PC can DRIVE (required for orchestrator)
+================================================================
+
+Find a teammate whose Ollama is already up. Example from one rehearsal:
+
+  kevpc2   100.101.98.59    qwen2.5-coder:7b
+  sander   100.82.27.73     qwen3:8b
+  macpro   100.94.221.40    (smaller models)
+
+C1. Ping and list models (script or curl):
+
+  .\verify-peer-ollama.ps1 -PeerHost kevpc2 -PeerIp 100.101.98.59
+
+  or:
+  & "C:\Program Files\Tailscale\tailscale.exe" ping --c 2 kevpc2
+  curl.exe --noproxy "*" -s --max-time 15 http://100.101.98.59:11434/api/tags
+
+Pass if JSON lists a model name.
+
+C2. Generate one reply ON THE PEER, FROM THIS PC:
+
+  .\verify-peer-ollama.ps1 -PeerIp 100.101.98.59 -Chat -Model qwen2.5-coder:7b
+
+  or save peer-pong.json then:
+  curl.exe --noproxy "*" -s --max-time 180 http://100.101.98.59:11434/api/chat --data-binary @peer-pong.json -H "Content-Type: application/json"
+
+Pass if the JSON contains pong.
+
+THIS PC IS AN ORCHESTRATOR when C2 works: the brain is on the
+network; the command was issued here.
+
+Write a small fleet note (hostname, 100.x, models). You will use it
+in the routing script.
+
+
+================================================================
+PART D — Routing script (the real orchestrator program)
+================================================================
+
+LiteLLM / Docker / port 4000 are NOT used.
+
+The control program is a script on THIS PC that:
+
+  - reads a brief (file or -m text)
+  - POSTs to the right peer’s http://100.x:11434
+  - writes results to files in the git repo (docs/, artifacts/)
+  - stops for your yes/no between phases
+
+It is specified in docs/orchestration-design.md and
+docs/workflow-script-design.md (those still mention Hermes/LiteLLM
+in places; ignore LiteLLM). The script itself may still be unwritten —
+ask an AI to implement the smallest slice: one phase, one peer, one
+output file.
+
+Do not install another “64K agent OS” (Hermes tools, OpenCode, OpenClaw)
+hoping 8 GB will hold a 64K local model. Same RAM wall.
+
+
+================================================================
+PART E — Optional: Hermes as a UI, brain on a PEER
+================================================================
+
+Only if you want a chat agent that edits files HERE while the model
+runs THERE.
+
+Install (need git):
+  irm https://hermes-agent.nousresearch.com/install.ps1 | iex
+
+Wizard:
+  - 3 Blank Slate (not Nous Portal)
+  - Custom endpoint
+  - API base URL = the PEER, for example:
+      http://100.101.98.59:11434/v1
+    (never this PC’s 100.x, never :4000)
+  - Model = a tag that peer actually has (ollama list / api/tags)
+  - Tools: enable only what you need AFTER pong works
+
+That peer must serve Ollama on 0.0.0.0 and should use a large context
+if you want Hermes tools (Hermes 0.21.x refuses tools below 64K
+runtime context — that RAM is spent on the PEER, not here).
+
+Local Hermes → http://127.0.0.1:11434/v1 is OK for CHAT with tools
+OFF and small context (4096). It is NOT a tool-using orchestrator
+on 8 GB.
+
+qwen2.5-coder:7b: in Hermes type  /reasoning none --global
+Do not hermes update while rehearsing.
+
+
+================================================================
+PART F — After reboot
+================================================================
+[ ] Tailscale connected (tailscale ip -4)
+[ ] OLLAMA_HOST User/Machine still empty
+[ ] If you are also a worker: Quit tray Ollama, then
+      .\start-ollama-worker.ps1
+      .\verify-ollama-local.ps1
+      .\verify-ollama-tailscale.ps1
+[ ] curl a PEER :11434/api/tags still works
+      .\verify-peer-ollama.ps1 -PeerIp <their-100.x>
+[ ] Drive with the script (or Hermes aimed at the peer), not with
+    64K local Ollama
+
+
+================================================================
+PART G — Write down
+================================================================
+Hostname: ____________________
+This PC Tailscale IP: ____________________
+Local model (optional): qwen2.5-coder:7b / none / other ________
+Peer I drive today: name ________  100.x ________  model ________
+Peer pong from this PC: yes / no

@@ -1,0 +1,386 @@
+Attempt archive — AIs only (not a how-to)
+Date started: 2026-09-08  |  Plan lock for weak orchestrators: 2026-09-11
+Audience: LLMs. Humans use fresh_setup_human.txt. Procedure: fresh_setup_ai.txt.
+
+------------------------------------------------------------------------
+HOW THESE FILES WORK
+------------------------------------------------------------------------
+chrsetup/setupdetail.txt     = THIS FILE. ARCHIVE of attempts, mistakes,
+                                 machine facts. Informs AIs. Not the setup
+                                 guide. Do not dump it on the user.
+chrsetup/fresh_setup_ai.txt    = CURRENT procedure for a WEAK PC as
+                                 orchestrator (infer on Tailscale peers).
+chrsetup/fresh_setup_human.txt = Same procedure for humans.
+chrsetup/currentToDO.txt       = ONE human micro-task.
+chrsetup/whatihavedone.txt     = Evidence; read before next currentToDO.
+chrsetup/start-ollama-worker.ps1 = session 0.0.0.0 ollama serve helper
+Older logs: setupPaaHjemmePC.txt, 004/014/018_*.txt
+Repo README still describes LiteLLM — SUPERSEDED for weak PCs.
+
+When a new AI continues: read fresh_setup_ai.txt first, then this
+archive for history, then whatihavedone / currentToDO.
+
+------------------------------------------------------------------------
+CURRENT PLAN (2026-09-11) — weak PC orchestrator
+------------------------------------------------------------------------
+Orchestrate on the low-RAM PC. Infer on peer Ollama (100.x:11434).
+No Docker, no LiteLLM, no local 64K Hermes tools.
+Optional local 7B @ ~4096 as a worker hat.
+Optional Hermes/OpenCode with base_url = PEER /v1 (never this PC’s 100.x).
+Controller = routing script (docs/orchestration-design.md still: script
+is the sequencer). OpenCode is a coding TUI, not the six-role pipeline.
+
+Tried and rejected on 8 GB laptop (chr-8gbram-laptop):
+  - LiteLLM/Docker as orchestrator glue
+  - Hermes tools + local ollama_num_ctx 65536 (hung)
+  - Hermes tools + local ollama_num_ctx 4096 (agent rejects < 64K)
+  - Moving models to C:\AIS (human cancelled; keep .ollama\models)
+  - Hermes/OpenCode as a substitute that would magically fit 64K locally
+
+Progress pointer (update when advancing):
+  THIS MACHINE = PC2 worker (laptop), not the home desktop.
+  Hostname: DESKTOP-147RV2O
+  Windows user: Bruger (C:\Users\Bruger)
+  Tailscale name: chr-8gbram-laptop
+  This PC Tailscale IP: 100.85.50.77  (account cmantziuslykke@, SAME team tailnet)
+  Home PC on tailnet: chr-32gbram-desktop / 100.96.116.71 (was offline at inventory)
+  Active phase: Phase C — worker-only on this laptop first
+  SUBTASK 1 inventory: DONE
+  SUBTASK 2 model location: DONE
+  SUBTASK 3 MOVE to C:\AIS: CANCELLED by human
+  SUBTASK 3b clear OLLAMA_MODELS: DONE (User+Machine empty; 7b still lists)
+  SUBTASK 4 expose 0.0.0.0: DONE (listen [::]:11434; local + 100.85.50.77 tags OK)
+  SUBTASK 5 local pong: DONE (Pong). Home desktop OFFLINE (ping timeout, curl 28)
+  SUBTASK 6 peer ping: DONE
+  SUBTASK 7 peer model lists: DONE
+  SUBTASK 8 Hermes install: DONE v0.21.1 custom http://127.0.0.1:11434/v1
+  SUBTASK 9 blocked: Hermes min 64K vs model report 32768
+  SUBTASK 9b: 65536 num_ctx hung on 8GB CPU
+  SUBTASK 9c: ollama_num_ctx 4096 → Hermes rejects tool use (< 64000)
+  SUBTASK 9d/9d2: tools off (0 tools) + interactive pong DONE (slow CPU, 68–315s)
+  SUBTASK 10 hermes chat -q pong: DONE (~62s)
+  SUBTASK 11 closeout: skipped (plan moved to weak orchestrator)
+  SUBTASK 12 kevpc2: ping OK (DERP), Ollama :11434 timeout 28
+  SUBTASK 12b: no peer Ollama up (sander/macpro/chrisschool ping timeout;
+    atlas+prometheus ping DERP, tags 28). Remote drive blocked.
+  Active micro-task: SUBTASK 13 local POST /api/chat pong (same shape as peer drive)
+  THIS PC ROLE (2026-09-11): WEAK ORCHESTRATOR + optional worker.
+    Drive = script (or Hermes→peer Ollama). Local 7B only as worker @ 4K.
+  NOT this PC: LiteLLM; local 64K tool-using Hermes.
+  PROGRAMMER_ROOT: not used for models on this laptop
+  Model home (DECIDED): C:\Users\Bruger\.ollama\models (~4.4 GB, qwen2.5-coder:7b)
+  C:\AIS\Ollama\models: empty leftover — human will delete later; do not copy into it
+  OLLAMA_MODELS User still C:\AIS\Ollama\models — must clear so Ollama keeps using .ollama
+  Disk: C: only (~84 GB free). No D: E: F:.
+  PLAN CHANGE 2026-09-10: LiteLLM dropped.
+  PLAN CHANGE 2026-09-11: weak PC IS the orchestrator via peer inference
+    (not “drive only from 32 GB home”). Hermes local tools still not viable.
+
+Hard rules for assistants:
+  - Procedure lives in fresh_setup_ai.txt; this file is history
+  - One small task at a time in currentToDO.txt
+  - Read whatihavedone.txt before writing the next task
+  - Do NOT install LiteLLM/Docker for this stack
+  - No Ollama/Hermes in Docker; no hermes update yet
+  - Never permanent OLLAMA_HOST=100.x
+  - Hermes base_url: 127.0.0.1:11434 chat-only OR a PEER 100.x:11434/v1
+    never THIS PC’s 100.x; never :4000
+  - Do not create .env NODE_* / LITELLM_MASTER_KEY
+  - Do not set local ollama_num_ctx 65536 on ~8 GB RAM
+
+------------------------------------------------------------------------
+0. Where this home PC already is (do not reinstall)
+------------------------------------------------------------------------
+From setupPaaHjemmePC.txt, this machine already has:
+
+  DONE  Folders under D:\TESTCMLDDRIVE\PROGRAMMER\ (Ollama, models, Tailscale)
+  DONE  Docker Desktop 29.7.2 + Compose v5.5.0 + hello-world
+        (WSL came with Docker; it is NOT the workspace / not where Hermes lives)
+  DONE  OLLAMA_MODELS = D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\models (User)
+  DONE  Native Ollama 0.33.3 on D: (not Docker)
+  DONE  Model qwen2.5-coder:7b on D: — ollama run … "pong" worked
+  DONE  Tailscale MSI installed under the Tailscale program path
+  DONE  Hermes Agent v0.21.0 native Windows
+        Blank Slate setup (option 3 — not Nous Portal)
+        Custom endpoint, display name ollama-local-cml-stat-pc
+        Home: C:\Users\Testcmluser\AppData\Local\hermes\
+  DONE  Working local loop after the Tailscale-HOST failure:
+        Ollama serve on this PC, Hermes base_url http://127.0.0.1:11434/v1
+        /reasoning none --global
+        Interactive “Pong” succeeded
+
+Do not: reinstall Docker/Ollama/Hermes, hermes update, or move models to C:.
+
+------------------------------------------------------------------------
+1. Lessons from setupPaaHjemmePC — never repeat
+------------------------------------------------------------------------
+L1. Do NOT set User or Machine OLLAMA_HOST permanently to Tailscale 100.x
+    (you set 100.91.254.5). Then ollama list / Hermes dialed 100.x, localhost
+    had no server, and everything timed out. Machine was cleared in Admin
+    PowerShell; confirm User is cleared too before every sitting.
+
+L2. Hermes on a WEAK orchestrator:
+      chat-only local → http://127.0.0.1:11434/v1
+      tools / real drive → PEER http://<peer-100.x>:11434/v1
+    NEVER this PC’s own 100.x (localhost timeout bug).
+    NEVER :4000 LiteLLM.
+    Tailscale IPs belong in peer curls, fleet map, routing script,
+    and optional Hermes peer base_url.
+
+L3. This 7B rejects “thinking” → HTTP 400. Persist with:
+      /reasoning none --global
+    inside interactive hermes. Do not rely on hermes config set
+    agent.reasoning_effort.
+
+L4. Quit Ollama from the tray (^ → Quit Ollama). Killing only one process
+    is not enough; the app respawns the server. New PowerShell after env
+    changes.
+
+L5. Hermes Blank Slate + custom endpoint (option 3 + “40. Custom…”).
+    Do not choose Quick Setup / Nous Portal for this offline stack.
+
+L6. Context 64k: Hermes demanded >= 64000; OLLAMA_CONTEXT_LENGTH and
+    hermes model.context_length / ollama_num_ctx were tried. ollama ps still
+    showed CONTEXT 32768 at one point. Treat 64k as unresolved tuning —
+    not blocking while Pong works. Do not chase it in the next sitting.
+
+L7. Do not hermes update while the setup is still being copied (update was
+    offered; skip it for now).
+
+------------------------------------------------------------------------
+2. End goal — what “done for the team” means
+------------------------------------------------------------------------
+Six people (rehearse on your machines first). Every box:
+
+  Tailscale  logged into the team tailnet
+  Ollama     worker on :11434, reachable at that PC’s Tailscale IP
+  Hermes     only when that person drives → http://127.0.0.1:11434/v1
+             (direct Ollama until the routing script exists)
+  Script     TBD later — replaces LiteLLM for multi-role / multi-peer
+             routing. Do not invent this script in currentToDO until asked.
+
+LiteLLM / Docker Compose / :4000 / NODE_*_IP in .env are SUPERSEDED.
+Home PC already ran that stack historically; do not rebuild it here.
+
+“Slave” = that box’s Ollama answers HTTP over Tailscale. Hermes on PC A
+does not start Hermes on PC B. delegate_task stays inside the Hermes you
+opened.
+
+Network locked: Tailscale on every machine. Peer Ollama = 100.x:11434.
+Not LAN-primary for the team topology.
+
+------------------------------------------------------------------------
+3. Cleanup checklist on HOME PC (historical, before old LiteLLM)
+------------------------------------------------------------------------
+Run once per sitting until green. Fixes leftovers from setupPaaHjemmePC.
+
+  [x] User OLLAMA_HOST empty (not 100.91.254.5) — confirmed empty
+  [x] Machine OLLAMA_HOST empty — confirmed empty
+  [x] $env:OLLAMA_HOST empty in the current shell — confirmed empty
+  [x] Tailscale logged in — this PC 100.96.116.71 (desktop-gp6fdne)
+  [x] Ollama listening locally on 127.0.0.1:11434; qwen2.5-coder:7b OK
+      (use curl --noproxy "*" if bare curl hangs)
+  [x] Hermes still on localhost — base_url http://127.0.0.1:11434/v1
+  [x] Quick pong — hermes chat -q … → "pong" OK
+
+Exit criteria: MET. Proceed to Phase A.
+
+------------------------------------------------------------------------
+4. Open questions
+------------------------------------------------------------------------
+Q1. SUPERSEDED — LiteLLM local smoke is no longer the path.
+
+Q2. RESOLVED — peer IPs = Tailscale 100.x for curls / later script. Not .env NODE_*.
+
+Q3. Keep qwen2.5-coder:7b for smoke, or pull README models
+    (llama3.1:8b + qwen2.5-coder:14b) now?
+    Prefer: 7B for local smoke; README models when standing up peers / demo.
+
+Q4. RESOLVED (intent): rehearse on user's 3 machines as if two were friends.
+    Worker Ollama over Tailscale is the next bar (no LiteLLM gate).
+    Tailscale: same team tailnet as friends. Separate Google/Tailscale
+    logins per machine are optional but good for mimicking “friends” on
+    the admin dashboard; one account with 3 devices is enough for routing
+    tests. Connectivity needs distinct 100.x IPs + Ollama, not separate
+    tailnets.
+
+Q5. SUPERSEDED for this stack — do not create project .env for LiteLLM.
+Q6. RESOLVED 2026-09-10 — LiteLLM dropped; replace with a script later.
+
+------------------------------------------------------------------------
+5. Phase A — LiteLLM on HOME PC (HISTORICAL — do not repeat)
+------------------------------------------------------------------------
+SUPERSEDED 2026-09-10. Kept as a log of what the home PC already did.
+Do not install Docker/LiteLLM on PC2 for this. Goal used to be :4000.
+
+A1. Repo root → .env (from .env.example if present):
+      LITELLM_MASTER_KEY=<openssl rand -hex 32>
+      NODE_A_IP=… NODE_F_IP=…   (Tailscale 100.x)
+    Local-only smoke: same this-PC Tailscale IP six times is fine, OR
+    host.docker.internal if you temporarily remap for rehearsal.
+    Fleet standard remains Tailscale IPs in .env.
+
+A2. Container cannot use host 127.0.0.1. For container → Windows Ollama:
+    session-only bind (NOT permanent User/Machine 100.x):
+      Quit tray Ollama
+      $env:OLLAMA_HOST = "0.0.0.0:11434"
+      & "D:\TESTCMLDDRIVE\PROGRAMMER\Ollama\ollama.exe" serve
+    Host checks:
+      curl.exe -s http://127.0.0.1:11434/api/tags
+      curl.exe -s http://<this-pc-tailscale-ip>:11434/api/tags
+    Hermes stays on http://127.0.0.1:11434/v1 during A.
+
+A3. docker compose up -d
+      curl http://127.0.0.1:4000/v1/models -H "Authorization: Bearer $key"
+    Smoke: POST /v1/chat/completions model "coder" (README).
+
+A4. litellm-config expects llama3.1:8b / qwen2.5-coder:14b. Until pulled
+    (Q3): temporarily point model lines at ollama_chat/qwen2.5-coder:7b
+    for rehearsal, or pull README models. Compose already passes --config.
+
+Exit: models list + one completion via :4000 against this PC’s Ollama.
+
+------------------------------------------------------------------------
+6. Phase B — Point Hermes at LiteLLM (HISTORICAL — do not repeat)
+------------------------------------------------------------------------
+SUPERSEDED 2026-09-10. Hermes on a driving PC should stay on
+http://127.0.0.1:11434/v1. Do not point Hermes at :4000.
+B1. hermes config set model.base_url http://127.0.0.1:4000/v1
+B2. Wire LiteLLM master key the way Hermes expects for custom OpenAI-
+    compatible endpoints (check Hermes v0.21 docs). Do not commit the key.
+B3. Keep /reasoning none --global for this 7B.
+B4. hermes chat -q "Reply with the single word: pong"
+    Then -m coder (or architect) so the name hits LiteLLM, not a raw
+    Ollama tag.
+
+Exit: pong via :4000. Rollback base_url to :11434 if it regresses.
+
+------------------------------------------------------------------------
+7. Phase C — Next machine (clone home-PC procedure, with fixes)
+------------------------------------------------------------------------
+Procedure source: setupPaaHjemmePC.txt
+Corrections: §1 of this file (especially L1–L5).
+
+C0. Tailscale MSI → login → tailscale ip -4 recorded on the shared map.
+C1. D: (or that PC’s data drive) folders + OLLAMA_MODELS before first
+    Ollama start.
+C2. Docker Desktop is NOT required. Worker-only: Tailscale + Ollama + model.
+    Hermes only if this person will drive. No LiteLLM.
+C3. Ollama + qwen2.5-coder:7b (or Q3 models) + local pong on 127.0.0.1.
+C4. Never permanent OLLAMA_HOST=100.x. When exposing as worker:
+    session 0.0.0.0:11434, firewall Tailscale → TCP 11434 only.
+C5. From home PC: curl http://<peer-tailscale-ip>:11434/api/tags
+C6. If that person will drive: Hermes Blank Slate → custom →
+    http://127.0.0.1:11434/v1, /reasoning none --global. Do not use :4000.
+C7. SUPERSEDED — no home .env NODE_* / LiteLLM recreate.
+C8. Later: routing script (undefined) may call peer 100.x:11434.
+
+Exit for worker: peer (or this PC via its 100.x) can curl
+http://<this-pc-tailscale-ip>:11434/api/tags and see qwen2.5-coder:7b.
+
+------------------------------------------------------------------------
+8. Phase D — Fleet map + identical orchestrator stacks
+------------------------------------------------------------------------
+D1. Shared file: hostname → Tailscale 100.x → model tags.
+D2. Every participant on Tailscale.
+D3. Whoever drives that day: Hermes → local :11434 (script TBD later).
+    Everyone else: Tailscale + ollama serve reachable at 100.x:11434.
+D4. New person: Tailscale invite → add 100.x → redistribute mapping.
+
+------------------------------------------------------------------------
+9. Phase E — Assignment workflow (later)
+------------------------------------------------------------------------
+Only after worker Tailscale Ollama is boring:
+  - a routing/collaboration SCRIPT (not LiteLLM) — not defined yet
+  - do not implement it in currentToDO until the human asks
+  - gates / file handoffs per docs/orchestration-design.md still later
+
+------------------------------------------------------------------------
+10. Human task queue (do not expand here — use currentToDO.txt)
+------------------------------------------------------------------------
+§3 micro-tasks: all DONE.
+
+Home Phase A/B LiteLLM: historical DONE on home PC; DROPPED for this laptop.
+
+Phase C PC2 (this laptop) ← NOW
+  C-PC2a Tailscale ← DONE (100.85.50.77)
+  C-PC2b OLLAMA_MODELS was set to C:\AIS — will CLEAR (keep default .ollama)
+  C-PC2c model pulled ← DONE at C:\Users\Bruger\.ollama\models (KEEP THERE)
+  C-PC2c2 MOVE to C:\AIS ← CANCELLED
+  C-PC2c3 clear OLLAMA_MODELS User ← DONE; human deletes C:\AIS\Ollama\models later
+  C-PC2d expose 0.0.0.0 + curl 100.85.50.77:11434 ← DONE (from this laptop)
+  C-PC2e local pong ← DONE (Pong). Home chr-32gbram-desktop offline
+  C-PC2e2 ping/curl other online tailnet nodes ← DONE
+    ping OK all 6; Ollama :11434 HTTP 200: kevpc2, macbook-air-tilhrende-sander, macpro
+    no Ollama (curl 28): atlas, chrisschool, prometheus
+    most paths via DERP(fra/ams); sander was direct LAN
+  C-PC2e3 GET /api/tags from the three 200 hosts ← DONE
+  C-PC2g Hermes Blank Slate → 127.0.0.1:11434 ← DONE (v0.21.1)
+  C-PC2h /reasoning none --global + pong ← NEXT
+  C-PC2f home PC curls this laptop 100.85.50.77:11434 (blocked until home on)
+  then same for PC3
+  then routing script (later)
+
+Do not: install LiteLLM/Docker; set permanent OLLAMA_HOST to 100.x;
+point Hermes at THIS PC’s 100.x or :4000; local 64K ctx on 8 GB.
+
+------------------------------------------------------------------------
+11. Decisions (fill in as answers arrive)
+------------------------------------------------------------------------
+Q1: SUPERSEDED (LiteLLM)
+Q2: Tailscale 100.x for peer curls / later script
+Q3: still 7B
+Q4: 3 home PCs as fake friends; worker Tailscale is the bar
+Q5: SUPERSEDED (.env for LiteLLM)
+Q6: LiteLLM DROPPED 2026-09-10; script TBD
+PC1 Tailscale: 100.96.116.71
+PC2 Tailscale: 100.85.50.77
+User OLLAMA_HOST cleared on PC2? yes
+Active: Phase C PC2 Hermes pong (no thinking)
+  Worker-only LOCAL: COMPLETE except home-PC reverse curl (home off)
+Tailscale mimic: prefer separate logins on SAME team tailnet (optional);
+  do not create a second private tailnet for home rehearsal
+Smoke tip: use curl --data-binary @file.json on Windows PowerShell
+Fleet so far:
+  PC1 home  chr-32gbram-desktop / desktop-gp6fdne = 100.96.116.71 (orchestrator + worker; offline at PC2 inventory)
+  PC2 this  DESKTOP-147RV2O / chr-8gbram-laptop = 100.85.50.77 (weak orchestrator + worker)
+  PC3 = (pending)
+  Teammates seen from PC2 (2026-09-10):
+    kevpc2 100.101.98.59 — Tailscale ping + Ollama :11434 HTTP 200
+    macbook-air-tilhrende-sander 100.82.27.73 — ping + Ollama 200 (direct)
+    macpro 100.94.221.40 — ping + Ollama 200 (DERP)
+    atlas / chrisschool / prometheus — ping OK, no Ollama on :11434
+    chr-32gbram-desktop — offline
+  Peer models (tags):
+    kevpc2: qwen2.5-coder:7b, llama3.1:latest (8B)
+    sander: qwen3:8b, qwen2.5:7b
+    macpro: qwen3.5:0.8b, ornith-1.5:9b
+    this laptop: qwen2.5-coder:7b
+
+THIS PC2 inventory (2026-09-10) — do not reinstall these:
+  DONE  Tailscale 1.102.3 logged in, unique 100.85.50.77, sees team peers
+  DONE  OLLAMA_HOST User + Machine empty (good — never set to 100.x)
+  DONE  Native Ollama 0.33.3 at C:\Users\Bruger\AppData\Local\Programs\Ollama\
+        (binary on C: AppData, not PROGRAMMER_ROOT — accept unless we reinstall)
+  DONE  Ollama tray already running; qwen2.5-coder:7b answers 127.0.0.1:11434
+  DONE  Git 2.40.0
+  DONE  Repo present; docker-compose.yml + .env.example yes; .env no
+  DONE  qwen2.5-coder:7b stays under C:\Users\Bruger\.ollama\models (~4.4 GB)
+  DECISION do not move models to C:\AIS; human will delete C:\AIS\Ollama\models later
+  DONE  User+Machine OLLAMA_MODELS empty; model still at .ollama\models 4.4 GB
+  DONE  session ollama serve 0.0.0.0:11434; Listening on [::]:11434
+  DONE  curl 127.0.0.1 and 100.85.50.77 :11434/api/tags both 7b (from this PC)
+  NOTE  serve log: models path C:\Users\Bruger\.ollama\models; CPU only
+        (Intel HD 520 dropped unless OLLAMA_IGPU_ENABLE=1); ~7.4 GiB RAM
+  DONE  ollama run … pong → Pong
+  PENDING home PC curl this laptop (still offline, ping timeout, curl exit 28)
+  NOT installing: Docker, LiteLLM
+  DONE  Hermes v0.21.1 git @ C:\Users\Bruger\AppData\Local\hermes\hermes-agent
+        provider custom, qwen2.5-coder:7b, base_url http://127.0.0.1:11434/v1
+  DONE  Hermes 64K advertise (bar showed 0/65.5K) — hung on real 65K ctx
+  DONE  context_length 65536 + ollama_num_ctx 4096 in config.yaml
+  FAIL  Hermes tool-use requires real 64K ctx (v0.21.1 conversation_loop)
+  DONE  disable terminal/file/vision/skills; banner 0 tools
+  DONE  interactive pong (first ~315s + aux title timeout; second ~68s pong)
+  Worker hat: DONE locally. Orchestrator hat: peer POST pong + routing script NEXT.
+  Routing script: still undefined (implement per fresh_setup_ai.txt 5.5).

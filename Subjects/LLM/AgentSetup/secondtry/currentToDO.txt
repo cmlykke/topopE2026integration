@@ -1,0 +1,116 @@
+How to start THIS PC’s local Ollama so it is available on Tailscale
+===================================================================
+
+Goal: collaborators can hit http://<your-100.x>:11434 (model: qwen2.5-coder:7b).
+
+Do NOT:
+  - Set User or Machine OLLAMA_HOST (especially not to a 100.x address)
+  - Leave the Ollama tray app running (it only listens on 127.0.0.1)
+  - Install Docker or LiteLLM
+  - Use 64K context on this 8 GB machine
+
+Need TWO PowerShell windows: A = serve (leave open), B = verify.
+
+================================================================
+WINDOW A — start the worker (leave this window open)
+================================================================
+
+1. Tailscale must already be up:
+     & "C:\Program Files\Tailscale\tailscale.exe" status
+     & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+   Pass: you are logged into the TEAM tailnet and have a 100.x IPv4
+   (this laptop was 100.85.50.77 — write whatever ip -4 prints today).
+
+2. Tray: Ollama icon → Quit Ollama.
+   If you skip this, serve will say “address already in use” and stay localhost-only.
+
+3. In PowerShell:
+
+     cd C:\Users\Bruger\IdeaProjects\LLM-mandatory-1\chrsetup
+     .\start-ollama-worker.ps1
+
+   Same thing without the helper:
+
+     $env:OLLAMA_HOST = "0.0.0.0:11434"
+     ollama serve
+
+   Pass: it prints session OLLAMA_HOST=0.0.0.0:11434 and this PC’s Tailscale IPv4.
+   Leave the window open. Closing it stops the worker.
+
+Why 0.0.0.0: tray Ollama binds 127.0.0.1 only. Peers on Tailscale need all-interfaces bind so http://YOUR.100.x:11434 answers.
+
+================================================================
+WINDOW B — verify (new PowerShell; do not close WINDOW A)
+================================================================
+
+  cd C:\Users\Bruger\IdeaProjects\LLM-mandatory-1\chrsetup
+
+B1. Permanent env must be empty (both should print nothing):
+
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "User")
+  [Environment]::GetEnvironmentVariable("OLLAMA_HOST", "Machine")
+
+B2. Local tags:
+
+  .\verify-ollama-local.ps1
+
+  Or:
+  curl.exe --noproxy "*" -s --max-time 10 http://127.0.0.1:11434/api/tags
+
+  Pass: JSON includes qwen2.5-coder:7b.
+
+B3. Listening on all interfaces, not only localhost:
+
+  netstat -an | findstr "11434"
+
+  Pass: LISTENING on 0.0.0.0:11434 and/or [::]:11434.
+  Fail (only 127.0.0.1:11434): Quit tray again, redo WINDOW A.
+
+B4. This PC’s Tailscale IP:
+
+  & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+
+  Pass: a 100.x address. Use THAT IP in B5 and when you tell comrades.
+
+B5. Tags via Tailscale IP (what comrades actually curl):
+
+  .\verify-ollama-tailscale.ps1
+
+  Or (replace IP with B4):
+  curl.exe --noproxy "*" -s --max-time 15 http://100.85.50.77:11434/api/tags
+
+  Pass: script prints PASS, or curl returns the same model JSON as B2.
+
+  If B2 PASS and B5 FAIL: Windows Firewall. Allow TCP 11434 on the Tailscale
+  interface only (Ollama has no auth — do not open 11434 to the whole internet).
+
+B6. Optional local pong (CPU, often ~1 minute):
+
+  .\verify-ollama-local.ps1 -Chat
+
+  Or:
+  curl.exe --noproxy "*" -s --max-time 180 http://127.0.0.1:11434/api/chat -H "Content-Type: application/json" --data-binary @peer-pong.json
+
+  Pass: JSON contains pong / Pong.
+
+================================================================
+Give comrades
+================================================================
+
+  Tailscale IP:  (from B4)
+  Model:         qwen2.5-coder:7b
+  Base URL:      http://<your-100.x>:11434
+
+They run (example IP 100.85.50.77 — replace with yours):
+
+  curl.exe --noproxy "*" -s --max-time 15 http://100.85.50.77:11434/api/tags
+  cd C:\Users\Bruger\IdeaProjects\LLM-mandatory-1\chrsetup
+  .\verify-peer-ollama.ps1 -PeerIp 100.85.50.77 -Chat -Model qwen2.5-coder:7b
+
+================================================================
+After reboot
+================================================================
+
+Tailscale up → Quit tray Ollama → WINDOW A (start-ollama-worker.ps1) → B2–B5.
+
+Paste WINDOW B output into whatihavedone.txt when done.
